@@ -206,53 +206,29 @@ export function PaymentGatewaySelector({ companyId, onGatewayChange }: PaymentGa
             </span>
           </button>
 
-          {/* PicPay */}
-          <button
-            type="button"
-            onClick={() => handleGatewaySelect('picpay')}
-            disabled={saving || !picPayReady}
-            className={cn(
-              "relative flex flex-col items-center justify-center gap-3 rounded-xl border-2 p-6 transition-all",
-              settings.active_payment_gateway === 'picpay' && picPayReady
-                ? "border-[#21c25e] bg-[#21c25e]/5 ring-2 ring-[#21c25e]/20"
-                : picPayReady
-                  ? "border-border hover:border-[#21c25e]/50 hover:bg-[#21c25e]/5 cursor-pointer"
-                  : "border-dashed border-muted-foreground/30 opacity-50 cursor-not-allowed"
-            )}
+          {/* PicPay - Em breve */}
+          <div
+            className="relative flex flex-col items-center justify-center gap-3 rounded-xl border-2 p-6 border-dashed border-muted-foreground/30 opacity-60 cursor-not-allowed"
           >
             {/* Logo */}
-            <div className="h-10 flex items-center justify-center">
+            <div className="h-10 flex items-center justify-center grayscale">
               <svg viewBox="0 0 80 40" className="h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="80" height="40" rx="6" fill="#21c25e"/>
                 <text x="40" y="26" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">PicPay</text>
               </svg>
             </div>
             
-            {/* Status */}
-            {picPayReady ? (
-              <Badge variant="outline" className="text-green-600 border-green-600 gap-1">
-                <Check className="h-3 w-3" />
-                Configurado
-              </Badge>
-            ) : (
-              <Badge variant="outline" className="text-muted-foreground gap-1">
-                <AlertCircle className="h-3 w-3" />
-                Não configurado
-              </Badge>
-            )}
-
-            {/* Active indicator */}
-            {settings.active_payment_gateway === 'picpay' && picPayReady && (
-              <div className="absolute -top-2 -right-2 flex items-center justify-center w-6 h-6 rounded-full bg-[#21c25e] text-white">
-                <Check className="h-4 w-4" />
-              </div>
-            )}
+            {/* Status - Em breve */}
+            <Badge variant="secondary" className="gap-1 bg-amber-100 text-amber-700 border-amber-300">
+              <AlertCircle className="h-3 w-3" />
+              Em breve
+            </Badge>
 
             {/* Text */}
             <span className="text-xs text-muted-foreground text-center">
-              PIX e Cartão de Crédito
+              Integração em manutenção
             </span>
-          </button>
+          </div>
         </div>
 
         {/* Info text */}
