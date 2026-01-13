@@ -347,7 +347,7 @@ serve(async (req) => {
           .from("subscription_plans")
           .select("*")
           .eq("key", planKey)
-          .single();
+          .maybeSingle();
 
         if (planError || !fullPlan) {
           logStep("Plan not found", { planKey, error: planError?.message });
@@ -357,6 +357,8 @@ serve(async (req) => {
         // Calculate subscription end date (30 days from now)
         const subscriptionEnd = new Date();
         subscriptionEnd.setDate(subscriptionEnd.getDate() + 30);
+        
+        const periodStart = new Date();
 
         // Update company subscription - clear grace period if was in grace
         const { error: updateError } = await supabaseClient
@@ -373,6 +375,37 @@ serve(async (req) => {
         if (updateError) {
           logStep("Error updating company", { error: updateError.message });
           throw updateError;
+        }
+
+        // Registrar pagamento na tabela subscription_payments
+        try {
+          const { error: paymentRecordError } = await supabaseClient
+            .from("subscription_payments")
+            .insert({
+              company_id: companyId,
+              plan_key: planKey,
+              plan_name: fullPlan.name,
+              amount: payment.transaction_amount || fullPlan.price,
+              payment_method: isPixPayment ? "pix" : "card",
+              payment_status: "paid",
+              payment_reference: String(paymentId),
+              paid_at: new Date().toISOString(),
+              period_start: periodStart.toISOString(),
+              period_end: subscriptionEnd.toISOString(),
+            });
+
+          if (paymentRecordError) {
+            // Log mas não falha a função - o pagamento principal já foi processado
+            logStep("Error recording subscription payment", { error: paymentRecordError.message });
+          } else {
+            logStep("Subscription payment recorded successfully", { 
+              companyId, 
+              planKey, 
+              amount: payment.transaction_amount 
+            });
+          }
+        } catch (recordErr) {
+          logStep("Exception recording subscription payment", { error: String(recordErr) });
         }
 
         logStep("Subscription activated successfully", { 
