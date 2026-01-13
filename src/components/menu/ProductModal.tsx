@@ -80,7 +80,7 @@ interface ProductIngredient {
   is_removable: boolean;
 }
 
-// Option Card Component for better visual display
+// Compact Option Card Component for better visual display
 function OptionCard({ 
   option, 
   isSelected, 
@@ -106,19 +106,19 @@ function OptionCard({
       onClick={onSelect}
       disabled={disabled}
       className={cn(
-        "relative w-full text-left rounded-xl border-2 transition-all duration-200 overflow-hidden",
+        "relative w-full text-left rounded-lg border transition-all duration-150 overflow-hidden",
         "focus:outline-none focus:ring-2 focus:ring-primary/30",
         isSelected
-          ? "border-primary bg-primary/5 shadow-md"
-          : "border-border hover:border-primary/40 hover:bg-muted/30",
+          ? "border-primary bg-primary/5 shadow-sm"
+          : "border-border hover:border-primary/40 hover:bg-muted/20",
         disabled && "opacity-50 cursor-not-allowed",
-        hasImage ? "p-0" : "p-3"
+        hasImage ? "p-0" : "px-3 py-2"
       )}
     >
       {hasImage ? (
-        // Card with image
-        <div className="flex items-stretch">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 bg-muted">
+        // Card with image - more compact
+        <div className="flex items-center">
+          <div className="w-12 h-12 flex-shrink-0 bg-muted">
             <img
               src={option.image_url!}
               alt={option.name}
@@ -126,60 +126,58 @@ function OptionCard({
               loading="lazy"
             />
           </div>
-          <div className="flex-1 p-3 flex flex-col justify-center min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <span className="font-medium text-sm block truncate">{option.name}</span>
-                {option.description && (
-                  <span className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-                    {option.description}
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {priceDisplay !== 0 && (
-                  <span className={cn(
-                    "text-sm font-semibold whitespace-nowrap",
-                    priceDisplay > 0 ? "text-primary" : "text-green-600"
-                  )}>
-                    {priceDisplay > 0 ? '+' : ''}R$ {priceDisplay.toFixed(2)}
-                    {showHalfPrice && ' (½)'}
-                  </span>
-                )}
-                <div className={cn(
-                  "w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors",
-                  selectionType === 'single' ? "rounded-full" : "rounded-md",
-                  isSelected 
-                    ? "bg-primary border-primary" 
-                    : "border-muted-foreground/40"
+          <div className="flex-1 px-2.5 py-1.5 flex items-center justify-between gap-2 min-w-0">
+            <div className="flex-1 min-w-0">
+              <span className="font-medium text-xs block truncate">{option.name}</span>
+              {option.description && (
+                <span className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">
+                  {option.description}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              {priceDisplay !== 0 && (
+                <span className={cn(
+                  "text-xs font-semibold whitespace-nowrap",
+                  priceDisplay > 0 ? "text-primary" : "text-green-600"
                 )}>
-                  {isSelected && (
-                    <Check className="h-3 w-3 text-primary-foreground" strokeWidth={3} />
-                  )}
-                </div>
+                  {priceDisplay > 0 ? '+' : ''}R$ {priceDisplay.toFixed(2)}
+                  {showHalfPrice && ' (½)'}
+                </span>
+              )}
+              <div className={cn(
+                "w-4 h-4 border-2 flex items-center justify-center flex-shrink-0 transition-colors",
+                selectionType === 'single' ? "rounded-full" : "rounded",
+                isSelected 
+                  ? "bg-primary border-primary" 
+                  : "border-muted-foreground/40"
+              )}>
+                {isSelected && (
+                  <Check className="h-2.5 w-2.5 text-primary-foreground" strokeWidth={3} />
+                )}
               </div>
             </div>
           </div>
         </div>
       ) : (
-        // Card without image
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
+        // Card without image - compact
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <div className={cn(
-              "w-5 h-5 border-2 flex items-center justify-center flex-shrink-0 transition-colors",
-              selectionType === 'single' ? "rounded-full" : "rounded-md",
+              "w-4 h-4 border-2 flex items-center justify-center flex-shrink-0 transition-colors",
+              selectionType === 'single' ? "rounded-full" : "rounded",
               isSelected 
                 ? "bg-primary border-primary" 
                 : "border-muted-foreground/40"
             )}>
               {isSelected && (
-                <Check className="h-3 w-3 text-primary-foreground" strokeWidth={3} />
+                <Check className="h-2.5 w-2.5 text-primary-foreground" strokeWidth={3} />
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <span className="font-medium text-sm block truncate">{option.name}</span>
+              <span className="font-medium text-xs block truncate">{option.name}</span>
               {option.description && (
-                <span className="text-xs text-muted-foreground line-clamp-1">
+                <span className="text-[10px] text-muted-foreground line-clamp-1">
                   {option.description}
                 </span>
               )}
@@ -187,7 +185,7 @@ function OptionCard({
           </div>
           {priceDisplay !== 0 && (
             <span className={cn(
-              "text-sm font-semibold whitespace-nowrap flex-shrink-0",
+              "text-xs font-semibold whitespace-nowrap flex-shrink-0",
               priceDisplay > 0 ? "text-primary" : "text-green-600"
             )}>
               {priceDisplay > 0 ? '+' : ''}R$ {priceDisplay.toFixed(2)}
@@ -757,26 +755,26 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg max-h-[95vh] md:max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0">
-        {/* Product Image - Full Width */}
+      <DialogContent className="sm:max-w-md max-h-[90vh] md:max-h-[85vh] overflow-hidden flex flex-col p-0 gap-0">
+        {/* Product Image - Compact */}
         {product.image_url && (
-          <div className="relative aspect-[16/9] sm:aspect-[21/9] w-full flex-shrink-0 bg-muted">
+          <div className="relative aspect-[2/1] w-full flex-shrink-0 bg-muted">
             <img
               src={product.image_url}
               alt={product.name}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
-              <h2 className="font-bold text-xl sm:text-2xl text-white leading-tight">{product.name}</h2>
-              <div className="flex items-center gap-2 mt-1">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
+              <h2 className="font-bold text-lg sm:text-xl text-white leading-tight">{product.name}</h2>
+              <div className="flex items-center gap-2 mt-0.5">
                 {product.promotional_price && Number(product.promotional_price) > 0 ? (
                   <>
-                    <span className="text-base line-through text-white/60">R$ {Number(product.price).toFixed(2)}</span>
-                    <span className="text-2xl sm:text-3xl font-bold text-white">R$ {getBasePriceForDisplay().toFixed(2)}</span>
+                    <span className="text-sm line-through text-white/60">R$ {Number(product.price).toFixed(2)}</span>
+                    <span className="text-xl sm:text-2xl font-bold text-white">R$ {getBasePriceForDisplay().toFixed(2)}</span>
                   </>
                 ) : (
-                  <span className="text-2xl sm:text-3xl font-bold text-white">R$ {getBasePriceForDisplay().toFixed(2)}</span>
+                  <span className="text-xl sm:text-2xl font-bold text-white">R$ {getBasePriceForDisplay().toFixed(2)}</span>
                 )}
               </div>
             </div>
@@ -785,71 +783,71 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto overscroll-contain">
-          <div className="px-4 sm:px-5 py-4 space-y-5">
+          <div className="px-3 sm:px-4 py-3 space-y-4">
             {/* Header without image */}
             {!product.image_url && (
-              <div className="pb-4 border-b border-border">
-                <h2 className="font-bold text-xl">{product.name}</h2>
-                <div className="flex items-center gap-2 mt-1">
+              <div className="pb-3 border-b border-border">
+                <h2 className="font-bold text-lg">{product.name}</h2>
+                <div className="flex items-center gap-2 mt-0.5">
                   {product.promotional_price && Number(product.promotional_price) > 0 ? (
                     <>
-                      <span className="text-base line-through text-muted-foreground">R$ {Number(product.price).toFixed(2)}</span>
-                      <span className="text-2xl font-bold text-primary">R$ {getBasePriceForDisplay().toFixed(2)}</span>
+                      <span className="text-sm line-through text-muted-foreground">R$ {Number(product.price).toFixed(2)}</span>
+                      <span className="text-xl font-bold text-primary">R$ {getBasePriceForDisplay().toFixed(2)}</span>
                     </>
                   ) : (
-                    <span className="text-2xl font-bold text-primary">R$ {getBasePriceForDisplay().toFixed(2)}</span>
+                    <span className="text-xl font-bold text-primary">R$ {getBasePriceForDisplay().toFixed(2)}</span>
                   )}
                 </div>
               </div>
             )}
 
             {product.description && (
-              <p className="text-muted-foreground text-sm">{product.description}</p>
+              <p className="text-muted-foreground text-xs">{product.description}</p>
             )}
 
             {/* Option Groups */}
             {visibleOptionGroups.length > 0 && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {visibleOptionGroups.map((group) => {
                   const groupHasImages = group.options.some(opt => opt.image_url && opt.image_url.trim() !== '');
                   
                   return (
-                    <div key={group.id} className="space-y-3">
-                      {/* Group Header */}
+                    <div key={group.id} className="space-y-2">
+                      {/* Group Header - Compact */}
                       <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <h4 className="font-semibold text-base truncate">{group.name}</h4>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <h4 className="font-semibold text-sm truncate">{group.name}</h4>
                           {group.id === 'acai-size' && (
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Info className="h-4 w-4 text-muted-foreground cursor-help flex-shrink-0" />
+                                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help flex-shrink-0" />
                                 </TooltipTrigger>
-                                <TooltipContent side="top" className="max-w-[250px]">
-                                  <p className="text-xs">Cada tamanho possui seus próprios adicionais. Selecione um tamanho para ver as opções.</p>
+                                <TooltipContent side="top" className="max-w-[220px]">
+                                  <p className="text-xs">Cada tamanho possui seus próprios adicionais.</p>
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
                           )}
                         </div>
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <div className="flex items-center gap-1 flex-shrink-0">
                           {group.is_required && (
-                            <Badge variant="destructive" className="text-[10px] px-1.5 py-0.5">
+                            <Badge variant="destructive" className="text-[9px] px-1.5 py-0 h-4">
                               Obrigatório
                             </Badge>
                           )}
                           {group.selection_type === 'multiple' && group.max_selections > 1 && (
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0.5">
+                            <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4">
                               {getGroupSelectionCount(group.id)}/{group.max_selections}
                             </Badge>
                           )}
                           {group.selection_type === 'multiple' && group.free_quantity_limit > 0 && (
-                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5">
+                            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4">
                               {group.free_quantity_limit} grátis
                             </Badge>
                           )}
                           {group.selection_type === 'half_half' && (
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0.5">
+                            <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4">
                               {getGroupSelectionCount(group.id)}/2
                             </Badge>
                           )}
@@ -857,14 +855,14 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
                       </div>
 
                       {group.description && group.id !== 'acai-size' && (
-                        <p className="text-xs text-muted-foreground -mt-1">{group.description}</p>
+                        <p className="text-[10px] text-muted-foreground -mt-1">{group.description}</p>
                       )}
 
-                      {/* Options Grid/List */}
+                      {/* Options Grid/List - Compact */}
                       <div className={cn(
-                        "space-y-2",
-                        // Use grid for groups with images on larger screens
-                        groupHasImages && group.options.length > 2 && "sm:grid sm:grid-cols-2 sm:gap-2 sm:space-y-0"
+                        "space-y-1.5",
+                        // Use grid for groups with many options
+                        group.options.length > 4 && !groupHasImages && "sm:grid sm:grid-cols-2 sm:gap-1.5 sm:space-y-0"
                       )}>
                         {group.options.map((option) => {
                           const isSelected = selectedOptions.some((o) => o.optionId === option.id);
@@ -900,14 +898,14 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
               </div>
             )}
 
-            {/* Removable Ingredients */}
+            {/* Removable Ingredients - Compact */}
             {ingredients.length > 0 && (
-              <div className="space-y-3 pt-2">
+              <div className="space-y-2 pt-1">
                 <div>
-                  <h4 className="font-semibold text-base">Remover ingredientes</h4>
-                  <p className="text-xs text-muted-foreground">Marque os ingredientes que deseja remover</p>
+                  <h4 className="font-semibold text-sm">Remover ingredientes</h4>
+                  <p className="text-[10px] text-muted-foreground">Marque os que deseja remover</p>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {ingredients.map((ingredient) => {
                     const isRemoved = removedIngredients.has(ingredient.id);
                     return (
@@ -924,7 +922,7 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
                           setRemovedIngredients(newSet);
                         }}
                         className={cn(
-                          "px-3 py-1.5 rounded-full text-sm border-2 transition-all",
+                          "px-2 py-1 rounded-full text-xs border transition-all",
                           isRemoved
                             ? "bg-destructive/10 border-destructive text-destructive line-through"
                             : "bg-background border-border hover:border-primary/50"
@@ -938,16 +936,16 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
               </div>
             )}
 
-            {/* Notes */}
-            <div className="space-y-2 pt-2">
-              <Label htmlFor="notes" className="text-sm font-medium">Observações</Label>
+            {/* Notes - Compact */}
+            <div className="space-y-1.5 pt-1">
+              <Label htmlFor="notes" className="text-xs font-medium">Observações</Label>
               <Textarea
                 id="notes"
                 placeholder="Ex: Bem passado, pouco sal..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={2}
-                className="resize-none"
+                className="resize-none text-sm min-h-[60px]"
                 autoFocus={false}
                 onFocus={(e) => e.target.scrollIntoView({ behavior: 'smooth', block: 'center' })}
               />
@@ -955,31 +953,31 @@ export function ProductModal({ product, open, onClose }: ProductModalProps) {
           </div>
         </div>
 
-        {/* Sticky Footer */}
-        <div className="flex-shrink-0 border-t border-border p-4 sm:px-5 bg-background">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center bg-secondary rounded-xl p-1">
+        {/* Sticky Footer - Compact */}
+        <div className="flex-shrink-0 border-t border-border p-3 sm:px-4 bg-background">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center bg-secondary rounded-lg p-0.5">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-10 w-10 rounded-lg"
+                className="h-9 w-9 rounded-md"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
               >
-                <Minus className="h-4 w-4" />
+                <Minus className="h-3.5 w-3.5" />
               </Button>
-              <span className="font-bold w-8 text-center text-lg">{quantity}</span>
+              <span className="font-bold w-7 text-center text-base">{quantity}</span>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-10 w-10 rounded-lg"
+                className="h-9 w-9 rounded-md"
                 onClick={() => setQuantity(quantity + 1)}
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-3.5 w-3.5" />
               </Button>
             </div>
 
             <Button
-              className="flex-1 h-12 rounded-xl text-base font-semibold gradient-primary text-primary-foreground"
+              className="flex-1 h-10 rounded-lg text-sm font-semibold gradient-primary text-primary-foreground"
               onClick={handleAddToCart}
               disabled={!canAddToCart}
             >
