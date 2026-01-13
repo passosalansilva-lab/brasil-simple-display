@@ -959,7 +959,13 @@ function PublicMenuContent() {
   }, [company?.id, categories]);
 
   // Carregar categorias e preços base de açaí
+  // Ref para evitar múltiplas execuções
+  const acaiLoadedRef = useRef(false);
+  
   useEffect(() => {
+    // Evitar recarregamento duplicado
+    if (acaiLoadedRef.current) return;
+    
     const loadAcaiData = async () => {
       try {
         if (!company?.id) {
@@ -967,6 +973,8 @@ function PublicMenuContent() {
           setAcaiCategoryBasePrices({});
           return;
         }
+
+        acaiLoadedRef.current = true;
 
         // Buscar categorias de açaí
         const { data: acaiCats, error: acaiCatsError } = await supabase
