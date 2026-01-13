@@ -200,10 +200,10 @@ serve(async (req) => {
         amounts: {
           product: totalCents,
         },
-        options: {
-          allow_create_pix_key: true,
-          expired_at: expiredAtDate,
-        },
+      },
+      options: {
+        allow_create_pix_key: true,
+        expired_at: expiredAtDate,
       },
     };
 
