@@ -376,7 +376,7 @@ export default function CustomerTransactions() {
     if (!user?.id) {
       toast({
         title: 'Sessão expirada',
-        description: 'Faça login novamente para solicitar estorno.',
+        description: 'Faça login novamente para estornar.',
         variant: 'destructive',
       });
       return;
@@ -384,43 +384,36 @@ export default function CustomerTransactions() {
 
     setSubmittingRefund(true);
     try {
-      // Determinar o provider baseado no payment_intent
-      const paymentId = selectedTransaction.stripe_payment_intent_id;
-      let paymentProvider = 'mercadopago';
-      if (paymentId?.startsWith('picpay_')) {
-        paymentProvider = 'picpay';
+      // Chama a edge function de estorno direto
+      const { data, error } = await supabase.functions.invoke('direct-refund', {
+        body: {
+          order_id: selectedTransaction.id,
+          reason: refundReason.trim(),
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Erro ao processar estorno');
       }
 
-      const { error } = await (supabase as any)
-        .from('refund_requests')
-        .insert({
-          company_id: companyId,
-          order_id: selectedTransaction.id,
-          original_amount: selectedTransaction.total,
-          requested_amount: selectedTransaction.total,
-          requested_by: user?.id,
-          reason: refundReason.trim(),
-          customer_name: selectedTransaction.customer_name,
-          payment_method: selectedTransaction.payment_method === 'pix' ? 'pix' : 'card',
-          payment_id: paymentId,
-          payment_provider: paymentProvider,
-          status: 'pending',
-        });
-
-      if (error) throw error;
+      if (data?.error) {
+        throw new Error(data.error);
+      }
 
       toast({
-        title: 'Solicitação enviada!',
-        description: 'Sua solicitação de estorno foi enviada para análise.',
+        title: 'Estorno realizado!',
+        description: data?.message || `Estorno de R$ ${selectedTransaction.total.toFixed(2)} processado com sucesso.`,
       });
 
       setShowRefundDialog(false);
-      setPendingRefunds([...pendingRefunds, selectedTransaction.id]);
+      // Recarrega as transações para refletir o status atualizado
+      loadTransactions();
+      loadPendingRefunds();
     } catch (error: any) {
-      console.error('Error submitting refund:', error);
+      console.error('Error processing refund:', error);
       toast({
-        title: 'Erro',
-        description: error.message || 'Não foi possível enviar a solicitação.',
+        title: 'Erro no estorno',
+        description: error.message || 'Não foi possível processar o estorno.',
         variant: 'destructive',
       });
     } finally {
@@ -809,7 +802,7 @@ export default function CustomerTransactions() {
                     }}
                   >
                     <RotateCcw className="h-4 w-4 mr-2" />
-                    Solicitar Estorno
+                    Estornar
                   </Button>
                 )}
               </div>
@@ -824,10 +817,10 @@ export default function CustomerTransactions() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <RotateCcw className="h-5 w-5 text-destructive" />
-              Solicitar Estorno
+              Estornar Pagamento
             </DialogTitle>
             <DialogDescription>
-              Sua solicitação será analisada pela equipe Cardpon.
+              O valor será devolvido diretamente para a conta do cliente.
             </DialogDescription>
           </DialogHeader>
           {selectedTransaction && (
@@ -835,8 +828,8 @@ export default function CustomerTransactions() {
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Você está solicitando o estorno de <strong>{formatCurrency(selectedTransaction.total)}</strong> referente 
-                  ao pagamento de <strong>{selectedTransaction.customer_name}</strong>.
+                  Você está estornando <strong>{formatCurrency(selectedTransaction.total)}</strong> para <strong>{selectedTransaction.customer_name}</strong>. 
+                  O valor será devolvido na mesma forma de pagamento usada pelo cliente.
                 </AlertDescription>
               </Alert>
 
@@ -867,12 +860,12 @@ export default function CustomerTransactions() {
                   {submittingRefund ? (
                     <>
                       <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                      Enviando...
+                      Processando...
                     </>
                   ) : (
                     <>
                       <RotateCcw className="h-4 w-4 mr-2" />
-                      Enviar Solicitação
+                      Confirmar Estorno
                     </>
                   )}
                 </Button>
