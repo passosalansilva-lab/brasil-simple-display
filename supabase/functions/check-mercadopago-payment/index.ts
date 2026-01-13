@@ -135,15 +135,46 @@ serve(async (req) => {
                 // Payment approved - update subscription
                 const externalRef = JSON.parse(prefData.external_reference);
                 
+                // Calculate subscription end date
+                const subscriptionEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                
                 await supabaseClient
                   .from("companies")
                   .update({
                     subscription_plan: externalRef.planKey,
                     subscription_status: 'active',
-                    subscription_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                    subscription_end_date: subscriptionEnd.toISOString(),
                     updated_at: new Date().toISOString(),
                   })
                   .eq("id", company.id);
+
+                // Registrar pagamento na tabela subscription_payments
+                try {
+                  const { data: plan } = await supabaseClient
+                    .from("subscription_plans")
+                    .select("name, price")
+                    .eq("key", externalRef.planKey)
+                    .maybeSingle();
+
+                  await supabaseClient
+                    .from("subscription_payments")
+                    .insert({
+                      company_id: company.id,
+                      plan_key: externalRef.planKey,
+                      plan_name: plan?.name || externalRef.planKey,
+                      amount: latestPayment.transaction_amount || plan?.price || 0,
+                      payment_method: externalRef.type === "pix_subscription" ? "pix" : "card",
+                      payment_status: "paid",
+                      payment_reference: String(latestPayment.id),
+                      paid_at: new Date().toISOString(),
+                      period_start: new Date().toISOString(),
+                      period_end: subscriptionEnd.toISOString(),
+                    });
+
+                  logStep("Subscription payment recorded");
+                } catch (recordErr) {
+                  logStep("Error recording subscription payment", { error: String(recordErr) });
+                }
 
                 logStep("Subscription activated via alternative search", { plan: externalRef.planKey });
 
