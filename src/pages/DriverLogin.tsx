@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
+import { driverSupabase } from '@/integrations/supabase/driverClient';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { applyCompanyBranding } from '@/hooks/useCompanyColors';
@@ -149,8 +150,9 @@ export default function DriverLogin() {
       }
 
       // Sucesso: a função retorna session com tokens prontos
+      // Use driverSupabase to avoid overwriting admin session
       if (loginData?.session) {
-        const { error: sessionError } = await supabase.auth.setSession({
+        const { error: sessionError } = await driverSupabase.auth.setSession({
           access_token: loginData.session.access_token,
           refresh_token: loginData.session.refresh_token,
         });

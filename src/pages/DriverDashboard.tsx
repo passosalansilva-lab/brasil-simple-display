@@ -34,7 +34,10 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { driverSupabase } from '@/integrations/supabase/driverClient';
+// Note: We use driverSupabase for queries that need driver's auth context
+// and supabase for functions.invoke which don't depend on client session
+import { useDriverAuth } from '@/hooks/useDriverAuth';
 import { useRealtimeDriverOrders } from '@/hooks/useRealtimeDriverOrders';
 import { PushNotificationButton } from '@/components/PushNotificationButton';
 import { InstallAppPrompt } from '@/components/InstallAppPrompt';
@@ -133,7 +136,7 @@ interface Order {
 }
 
 export default function DriverDashboard() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading: authLoading } = useDriverAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [driver, setDriver] = useState<any>(null);
@@ -161,7 +164,7 @@ export default function DriverDashboard() {
     const { latitude, longitude } = position.coords;
     console.log('Updating driver location:', { latitude, longitude });
 
-    await supabase
+    await driverSupabase
       .from('delivery_drivers')
       .update({
         current_latitude: latitude,
@@ -246,7 +249,7 @@ export default function DriverDashboard() {
   useEffect(() => {
     if (!driver?.id) return;
 
-    const channel = supabase
+    const channel = driverSupabase
       .channel('order-offers-realtime')
       .on(
         'postgres_changes',
@@ -282,7 +285,7 @@ export default function DriverDashboard() {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      driverSupabase.removeChannel(channel);
     };
   }, [driver?.id]);
 
@@ -384,7 +387,7 @@ export default function DriverDashboard() {
     if (!driver?.id) return;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await driverSupabase
         .from('order_offers')
         .select(`
           id,
@@ -461,7 +464,7 @@ export default function DriverDashboard() {
   const loadAssignedOrders = useCallback(
     async (driverIdToLoad: string) => {
       try {
-        const { data: ordersData, error: ordersError } = await supabase
+        const { data: ordersData, error: ordersError } = await driverSupabase
           .from('orders')
           .select(`
             *,
@@ -514,7 +517,7 @@ export default function DriverDashboard() {
       setLoading(true);
 
       // Get first active driver for this user
-      const { data: driverData, error: driverError } = await supabase
+      const { data: driverData, error: driverError } = await driverSupabase
         .from('delivery_drivers')
         .select('*')
         .eq('user_id', user.id)
@@ -553,20 +556,20 @@ export default function DriverDashboard() {
   const loadFinancials = useCallback(async (driverId: string) => {
     try {
       // Get pending deliveries (not paid yet)
-      const { data: pendingDeliveries } = await supabase
+      const { data: pendingDeliveries } = await driverSupabase
         .from('driver_deliveries')
         .select('delivery_fee_earned')
         .eq('driver_id', driverId)
         .eq('status', 'pending');
 
       // Get paid deliveries
-      const { data: payments } = await supabase
+      const { data: payments } = await driverSupabase
         .from('driver_payments')
         .select('amount')
         .eq('driver_id', driverId);
 
       // Get total delivery count
-      const { count: deliveryCount } = await supabase
+      const { count: deliveryCount } = await driverSupabase
         .from('driver_deliveries')
         .select('id', { count: 'exact', head: true })
         .eq('driver_id', driverId);
@@ -595,7 +598,7 @@ export default function DriverDashboard() {
     if (!driver) return;
 
     const newStatus = !driver.is_available;
-    const { error } = await supabase
+    const { error } = await driverSupabase
       .from('delivery_drivers')
       .update({ 
         is_available: newStatus,
@@ -668,7 +671,7 @@ export default function DriverDashboard() {
   const acceptDelivery = async (orderId: string) => {
     setUpdatingOrder(orderId);
     
-    const { error: orderError } = await supabase
+    const { error: orderError } = await driverSupabase
       .from('orders')
       .update({ status: 'ready' })
       .eq('id', orderId);
@@ -680,7 +683,7 @@ export default function DriverDashboard() {
     }
 
     // Update driver status to in_delivery
-    await supabase
+    await driverSupabase
       .from('delivery_drivers')
       .update({ driver_status: 'in_delivery' })
       .eq('id', driver.id);
@@ -696,7 +699,7 @@ export default function DriverDashboard() {
   const startDelivery = async (orderId: string) => {
     setUpdatingOrder(orderId);
     
-    const { error } = await supabase
+    const { error } = await driverSupabase
       .from('orders')
       .update({ status: 'out_for_delivery' })
       .eq('id', orderId);
@@ -723,7 +726,7 @@ export default function DriverDashboard() {
     
     setUpdatingOrder(orderId);
     
-    const { error } = await supabase
+    const { error } = await driverSupabase
       .from('orders')
       .update({ 
         status: 'delivered',
@@ -739,7 +742,7 @@ export default function DriverDashboard() {
 
     // Register the delivery in driver_deliveries
     const deliveryFee = driver.per_delivery_fee || 0;
-    await supabase
+    await driverSupabase
       .from('driver_deliveries')
       .insert({
         driver_id: driver.id,
@@ -779,7 +782,7 @@ export default function DriverDashboard() {
       // Fallback: if queue function fails, still check if driver should be available
       const remainingOrders = orders.filter(o => o.id !== orderId);
       if (remainingOrders.length === 0) {
-        await supabase
+        await driverSupabase
           .from('delivery_drivers')
           .update({ 
             driver_status: 'available',
@@ -1245,13 +1248,13 @@ export default function DriverDashboard() {
             onStartMultiDelivery={async (orderIds) => {
               // Update all selected orders to out_for_delivery
               for (const orderId of orderIds) {
-                await supabase
+                await driverSupabase
                   .from('orders')
                   .update({ status: 'out_for_delivery' })
                   .eq('id', orderId);
               }
               // Update driver status
-              await supabase
+              await driverSupabase
                 .from('delivery_drivers')
                 .update({ driver_status: 'in_delivery' })
                 .eq('id', driver.id);

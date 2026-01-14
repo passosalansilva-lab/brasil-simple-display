@@ -4,8 +4,8 @@ import { Loader2, AlertCircle, Truck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { driverSupabase } from '@/integrations/supabase/driverClient';
 import { toast } from 'sonner';
-
 export default function DriverTokenAccess() {
   const navigate = useNavigate();
   const { token } = useParams<{ token: string }>();
@@ -39,7 +39,8 @@ export default function DriverTokenAccess() {
         }
 
         if (data?.session) {
-          const { error: sessionError } = await supabase.auth.setSession({
+          // Use driverSupabase to avoid overwriting admin session
+          const { error: sessionError } = await driverSupabase.auth.setSession({
             access_token: data.session.access_token,
             refresh_token: data.session.refresh_token,
           });
