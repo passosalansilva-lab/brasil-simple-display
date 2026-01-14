@@ -45,6 +45,7 @@ import { DriverPaymentsModal } from '@/components/drivers/DriverPaymentsModal';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import MultiDeliveryMode from '@/components/drivers/MultiDeliveryMode';
+import { useCompanyColors } from '@/hooks/useCompanyColors';
 
 interface DriverFinancials {
   pendingEarnings: number;
@@ -145,6 +146,9 @@ export default function DriverDashboard() {
   const [financials, setFinancials] = useState<DriverFinancials>({ pendingEarnings: 0, totalPaid: 0, deliveryCount: 0 });
   const [showPaymentsModal, setShowPaymentsModal] = useState(false);
   const [isMultiDeliveryActive, setIsMultiDeliveryActive] = useState(false);
+
+  // Apply company colors for branding
+  useCompanyColors(driver?.company_id || null);
   
   const watchIdRef = useRef<number | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
