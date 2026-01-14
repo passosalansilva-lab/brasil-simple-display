@@ -959,29 +959,7 @@ export default function DriverDashboard() {
         {/* Controls */}
         <Card>
           <CardContent className="py-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {driver?.is_available ? (
-                  <Power className="h-5 w-5 text-green-500" />
-                ) : (
-                  <PowerOff className="h-5 w-5 text-muted-foreground" />
-                )}
-                <Label>Disponível para entregas</Label>
-              </div>
-              <Switch
-                checked={driver?.is_available}
-                onCheckedChange={toggleAvailability}
-                disabled={orders.length > 0}
-              />
-            </div>
-            
-            {orders.length > 0 && (
-              <p className="text-xs text-muted-foreground">
-                * Disponibilidade bloqueada enquanto houver entregas pendentes
-              </p>
-            )}
-
-            <div className="pt-2 border-t border-border space-y-3">
+            <div className="space-y-3">
               <PushNotificationButton
                 companyId={driver?.company_id}
                 userId={user?.id}
