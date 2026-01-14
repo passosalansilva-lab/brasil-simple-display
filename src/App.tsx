@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { AuthProvider } from "@/hooks/useAuth";
+import { DriverAuthProvider } from "@/hooks/useDriverAuth";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { ProtectedFeatureRoute } from "@/components/layout/ProtectedFeatureRoute";
 import { PageTitle } from "@/components/PageTitle";
@@ -527,9 +528,9 @@ const App = () => (
               <Route
                 path="/driver"
                 element={
-                  <ProtectedRoute>
+                  <DriverAuthProvider>
                     <DriverDashboard />
-                  </ProtectedRoute>
+                  </DriverAuthProvider>
                 }
               />
               <Route path="/super-admin-setup" element={<SuperAdminSetup />} />
