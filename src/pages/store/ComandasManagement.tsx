@@ -652,35 +652,17 @@ export default function ComandasManagement() {
         setStatusFilter('open');
         toast({ title: `✅ Comanda #${comandaNumber} encontrada` });
       } else {
-        // Check if there's a closed one with this number today
-        const closedToday = comandas.find(
-          (c) =>
-            c.number === comandaNumber &&
-            c.status === 'closed' &&
-            new Date(c.created_at).toDateString() === new Date().toDateString()
-        );
-
-        if (closedToday) {
-          playErrorSound();
-          setSelectedComanda(closedToday);
-          setStatusFilter('closed');
-          toast({
-            title: `⚠️ Comanda #${comandaNumber} já foi fechada`,
-            description: 'Mostrando comanda fechada',
-            variant: 'destructive',
-          });
-        } else {
-          // Offer to create new comanda with this number
-          playSuccessSound();
-          setSelectedGeneratedComanda(comandaNumber);
-          setIsManualNumber(false);
-          setNewComandaNumber('');
-          setShowNewDialog(true);
-          toast({
-            title: `🆕 Criar Comanda #${comandaNumber}`,
-            description: 'Complete os dados para criar a comanda',
-          });
-        }
+        // Comanda is reusable (like a card with barcode), so always offer to create new
+        // Even if there was a closed comanda with this number before, we can reuse it
+        playSuccessSound();
+        setSelectedGeneratedComanda(comandaNumber);
+        setIsManualNumber(false);
+        setNewComandaNumber('');
+        setShowNewDialog(true);
+        toast({
+          title: `🆕 Criar Comanda #${comandaNumber}`,
+          description: 'Complete os dados para criar a comanda',
+        });
       }
     } finally {
       setScannerLoading(false);

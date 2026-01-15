@@ -274,12 +274,16 @@ export default function PrintBatchComandas() {
     const doc = iframe.contentDocument || iframe.contentWindow?.document;
     if (!doc) return;
 
+    // Generate document title with company name
+    const sanitizedCompanyName = (companyName || 'Estabelecimento').replace(/[^a-zA-Z0-9À-ÿ\s]/g, '').replace(/\s+/g, '_');
+    const documentTitle = `${sanitizedCompanyName}_COMANDAS`;
+    
     doc.open();
     doc.write(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Comandas ${startNumber} a ${endNumber}</title>
+          <title>${documentTitle}</title>
           ${printStyles}
         </head>
         <body>
