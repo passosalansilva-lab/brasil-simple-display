@@ -18,8 +18,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { supabase } from '@/integrations/supabase/client';
-import { format, differenceInMinutes, startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { format, differenceInMinutes, startOfMonth, endOfMonth, subMonths, startOfDay, endOfDay, subDays, eachDayOfInterval, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface DriverHistoryModalProps {
   open: boolean;
@@ -65,6 +66,7 @@ export function DriverHistoryModal({
   const [deliveries, setDeliveries] = useState<DeliveryRecord[]>([]);
   const [metrics, setMetrics] = useState<DriverMetrics | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDay, setSelectedDay] = useState<string>('all'); // 'all', 'today', 'yesterday', or date string
   const [page, setPage] = useState(0);
   const pageSize = 10;
 
@@ -220,6 +222,7 @@ export function DriverHistoryModal({
 
   const handlePreviousMonth = () => {
     setCurrentMonth(subMonths(currentMonth, 1));
+    setSelectedDay('all');
     setPage(0);
   };
 
@@ -228,12 +231,36 @@ export function DriverHistoryModal({
     nextMonth.setMonth(nextMonth.getMonth() + 1);
     if (nextMonth <= new Date()) {
       setCurrentMonth(nextMonth);
+      setSelectedDay('all');
       setPage(0);
     }
   };
 
-  const paginatedDeliveries = deliveries.slice(page * pageSize, (page + 1) * pageSize);
-  const totalPages = Math.ceil(deliveries.length / pageSize);
+  // Get days of the current month for the filter
+  const daysInMonth = eachDayOfInterval({
+    start: startOfMonth(currentMonth),
+    end: endOfMonth(currentMonth) > new Date() ? new Date() : endOfMonth(currentMonth),
+  });
+
+  // Filter deliveries by selected day
+  const filteredDeliveries = deliveries.filter((delivery) => {
+    if (selectedDay === 'all') return true;
+    
+    const deliveryDate = new Date(delivery.created_at);
+    
+    if (selectedDay === 'today') {
+      return isSameDay(deliveryDate, new Date());
+    }
+    if (selectedDay === 'yesterday') {
+      return isSameDay(deliveryDate, subDays(new Date(), 1));
+    }
+    
+    // Specific date
+    return isSameDay(deliveryDate, new Date(selectedDay));
+  });
+
+  const paginatedDeliveries = filteredDeliveries.slice(page * pageSize, (page + 1) * pageSize);
+  const totalPages = Math.ceil(filteredDeliveries.length / pageSize);
 
   const formatDeliveryTime = (createdAt: string, deliveredAt: string | null) => {
     if (!deliveredAt) return '-';
@@ -317,27 +344,54 @@ export function DriverHistoryModal({
               </div>
             )}
 
-            {/* Month Navigation */}
-            <div className="flex items-center justify-between">
-              <Button variant="outline" size="sm" onClick={handlePreviousMonth}>
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Anterior
-              </Button>
-              <span className="font-medium">
-                {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleNextMonth}
-                disabled={
-                  currentMonth.getMonth() === new Date().getMonth() &&
-                  currentMonth.getFullYear() === new Date().getFullYear()
-                }
-              >
-                Próximo
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
+            {/* Month and Day Navigation */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Button variant="outline" size="sm" onClick={handlePreviousMonth}>
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Anterior
+                </Button>
+                <span className="font-medium">
+                  {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleNextMonth}
+                  disabled={
+                    currentMonth.getMonth() === new Date().getMonth() &&
+                    currentMonth.getFullYear() === new Date().getFullYear()
+                  }
+                >
+                  Próximo
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+              
+              {/* Day Filter */}
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">Filtrar por dia:</span>
+                <Select value={selectedDay} onValueChange={(value) => { setSelectedDay(value); setPage(0); }}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Selecione o dia" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todo o mês</SelectItem>
+                    <SelectItem value="today">Hoje</SelectItem>
+                    <SelectItem value="yesterday">Ontem</SelectItem>
+                    {daysInMonth.slice().reverse().map((day) => (
+                      <SelectItem key={day.toISOString()} value={day.toISOString()}>
+                        {format(day, "dd 'de' MMMM (EEEE)", { locale: ptBR })}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selectedDay !== 'all' && (
+                  <Badge variant="secondary" className="gap-1">
+                    {filteredDeliveries.length} entrega{filteredDeliveries.length !== 1 ? 's' : ''}
+                  </Badge>
+                )}
+              </div>
             </div>
 
             {/* Deliveries Table */}
@@ -413,8 +467,8 @@ export function DriverHistoryModal({
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-muted-foreground">
                       Mostrando {page * pageSize + 1} a{' '}
-                      {Math.min((page + 1) * pageSize, deliveries.length)} de{' '}
-                      {deliveries.length} entregas
+                      {Math.min((page + 1) * pageSize, filteredDeliveries.length)} de{' '}
+                      {filteredDeliveries.length} entregas
                     </p>
                     <div className="flex gap-2">
                       <Button
