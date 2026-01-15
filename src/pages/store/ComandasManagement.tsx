@@ -602,6 +602,41 @@ export default function ComandasManagement() {
 
   const cartTotal = cart.reduce((sum, item) => sum + item.calculatedPrice * item.quantity, 0);
 
+  // Sound effects for scanner feedback
+  const playSuccessSound = () => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.2);
+  };
+
+  const playErrorSound = () => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 300;
+    oscillator.type = 'square';
+    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.3);
+  };
+
   // Handle barcode scan - find or create comanda
   const handleBarcodeScan = async (comandaNumber: number) => {
     setScannerLoading(true);
@@ -612,9 +647,10 @@ export default function ComandasManagement() {
       );
 
       if (existingComanda) {
+        playSuccessSound();
         setSelectedComanda(existingComanda);
         setStatusFilter('open');
-        toast({ title: `Comanda #${comandaNumber} encontrada` });
+        toast({ title: `✅ Comanda #${comandaNumber} encontrada` });
       } else {
         // Check if there's a closed one with this number today
         const closedToday = comandas.find(
@@ -625,20 +661,24 @@ export default function ComandasManagement() {
         );
 
         if (closedToday) {
+          playErrorSound();
           setSelectedComanda(closedToday);
           setStatusFilter('closed');
           toast({
-            title: `Comanda #${comandaNumber} já foi fechada`,
+            title: `⚠️ Comanda #${comandaNumber} já foi fechada`,
             description: 'Mostrando comanda fechada',
+            variant: 'destructive',
           });
         } else {
           // Offer to create new comanda with this number
-          setIsManualNumber(true);
-          setNewComandaNumber(comandaNumber.toString());
+          playSuccessSound();
+          setSelectedGeneratedComanda(comandaNumber);
+          setIsManualNumber(false);
+          setNewComandaNumber('');
           setShowNewDialog(true);
           toast({
-            title: `Comanda #${comandaNumber} não encontrada`,
-            description: 'Criar nova comanda com este número?',
+            title: `🆕 Criar Comanda #${comandaNumber}`,
+            description: 'Complete os dados para criar a comanda',
           });
         }
       }
