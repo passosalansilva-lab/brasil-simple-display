@@ -28,14 +28,28 @@ export function BarcodeScanner({ onScan, isLoading, className }: BarcodeScannerP
   }, [isActive]);
 
   const processBarcode = useCallback((value: string) => {
-    if (!value.trim()) return;
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return;
     
-    const parsed = parseComandaBarcode(value.trim());
+    const parsed = parseComandaBarcode(trimmedValue);
     if (parsed !== null) {
-      setLastScan(value.trim());
+      setLastScan(trimmedValue);
       onScan(parsed);
+      // Clear input immediately after successful scan
+      setTimeout(() => {
+        setInputValue('');
+        bufferRef.current = '';
+        // Re-focus input for next scan
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 50);
+    } else {
+      // Invalid barcode - clear and refocus
       setInputValue('');
-      bufferRef.current = '';
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
     }
   }, [onScan]);
 
