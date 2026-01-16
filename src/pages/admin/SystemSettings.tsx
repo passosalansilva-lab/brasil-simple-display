@@ -357,6 +357,25 @@ export default function SystemSettings() {
     }
   };
 
+  // Toggle AI enabled and save immediately
+  const handleToggleAiEnabled = async (enabled: boolean) => {
+    setAiEnabled(enabled);
+    
+    try {
+      const { error } = await supabase
+        .from("system_settings")
+        .upsert({ key: "ai_enabled", value: enabled.toString() }, { onConflict: "key" });
+      
+      if (error) throw error;
+      toast.success(enabled ? "IA habilitada" : "IA desabilitada");
+    } catch (error) {
+      console.error("Error toggling AI:", error);
+      toast.error("Erro ao salvar configuração");
+      // Revert on error
+      setAiEnabled(!enabled);
+    }
+  };
+
   // Convert hex to HSL for CSS variables
   const hexToHsl = (hex: string): string => {
     const cleanHex = hex.replace('#', '');
@@ -662,7 +681,7 @@ export default function SystemSettings() {
               </div>
               <Switch
                 checked={aiEnabled}
-                onCheckedChange={setAiEnabled}
+                onCheckedChange={handleToggleAiEnabled}
               />
             </div>
 
