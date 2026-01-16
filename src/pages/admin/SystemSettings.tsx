@@ -6,11 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, Upload, Trash2, LayoutDashboard, Globe, UtensilsCrossed, Clock, Save, Play, CreditCard, Palette, RotateCcw, Brain, Key } from "lucide-react";
+import { Loader2, Upload, Trash2, LayoutDashboard, Globe, UtensilsCrossed, Clock, Save, Play, CreditCard, Palette, RotateCcw, Brain, Key, ScrollText } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 interface LogoLocation {
   key: string;
@@ -746,6 +747,25 @@ export default function SystemSettings() {
                 </p>
               </div>
             )}
+
+            <Separator />
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Logs de IA</p>
+                <p className="text-sm text-muted-foreground">
+                  Visualize o histórico de chamadas à API de IA
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.location.href = "/dashboard/admin/ai-logs"}
+              >
+                <ScrollText className="h-4 w-4 mr-2" />
+                Ver Logs
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
