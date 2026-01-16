@@ -420,7 +420,7 @@ export default function Dashboard() {
         )}
 
         {/* Desktop App Download Card */}
-        {companyId && companyStatus === 'approved' && (
+        {companyId && companyStatus === 'approved' && !desktopAppDownloaded && (
           <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
             <CardContent className="py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
@@ -442,17 +442,10 @@ export default function Dashboard() {
                 />
               )}
 
-              {!desktopAppDownloaded ? (
-                <Button className="gradient-primary gap-2" onClick={handleDesktopAppDownload}>
-                  <Download className="h-4 w-4" />
-                  Baixar para Windows
-                </Button>
-              ) : (
-                <span className="text-sm text-muted-foreground flex items-center gap-2">
-                  <Check className="h-4 w-4 text-green-500" />
-                  Já baixado
-                </span>
-              )}
+              <Button className="gradient-primary gap-2" onClick={handleDesktopAppDownload}>
+                <Download className="h-4 w-4" />
+                Baixar para Windows
+              </Button>
             </CardContent>
           </Card>
         )}
