@@ -550,7 +550,11 @@ export function ProductFormSheet({
   // Initialize form when product changes
   useEffect(() => {
     if (open) {
-      if (product) {
+      // Check if this is an existing product (has valid ID) vs new/duplicate
+      const isExistingProduct = product && product.id && product.id.length > 0;
+      
+      if (isExistingProduct) {
+        // Editing existing product
         setProductForm({
           name: product.name,
           description: product.description || '',
@@ -571,8 +575,29 @@ export function ProductFormSheet({
         if (isPizzaCategory) {
           loadPizzaSettings(product.id);
         }
+      } else if (product && !product.id) {
+        // Duplicating product - fill form with product data but treat as new
+        setProductForm({
+          name: product.name,
+          description: product.description || '',
+          price: String(product.price),
+          promotional_price: product.promotional_price ? String(product.promotional_price) : '',
+          image_url: product.image_url,
+          preparation_time_minutes: String(product.preparation_time_minutes ?? '30'),
+          is_featured: product.is_featured,
+          is_prepared: product.preparation_time_minutes !== null,
+          allow_half_half_flavor: true,
+          tags: (product as any).tags || [],
+        });
+        setCurrentProductId(null); // Treat as new product
+        setStep(1);
+        setGroups([]);
+        toast({
+          title: 'Duplicando produto',
+          description: 'Altere o nome e salve para criar uma cópia.',
+        });
       } else {
-        // Check for draft to restore
+        // New product - check for draft to restore
         const draft = getDraft();
         if (draft && isDraftMeaningful(draft.data, ['name', 'description', 'price'])) {
           setProductForm({

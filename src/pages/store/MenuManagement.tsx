@@ -644,6 +644,16 @@ export default function MenuManagement() {
     setProductSheet({ open: true, product, categoryId: product.category_id });
   };
 
+  const duplicateProduct = (product: Product) => {
+    // Create a copy with modified name to indicate it's a duplicate
+    const duplicatedProduct: Product = {
+      ...product,
+      id: '', // Clear ID to create new product
+      name: `${product.name} (cópia)`,
+    };
+    setProductSheet({ open: true, product: duplicatedProduct, categoryId: product.category_id });
+  };
+
   const toggleProductActive = async (product: Product) => {
     try {
       const { error } = await supabase
@@ -1199,6 +1209,7 @@ export default function MenuManagement() {
                                                 openEditProduct(p as any);
                                               }
                                             }}
+                                            onDuplicate={(p) => duplicateProduct(p as any)}
                                             onToggleActive={(p) => toggleProductActive(p as any)}
                                             onToggleFeatured={() => {}}
                                             onDelete={(p) =>
