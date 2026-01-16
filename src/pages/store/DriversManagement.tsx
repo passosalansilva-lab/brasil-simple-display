@@ -732,6 +732,18 @@ export default function DriversManagement() {
     }
   };
 
+  const openDriverAccessLink = async (driver: Driver) => {
+    const accessLink = await getDriverAccessLink(driver);
+    
+    if (accessLink) {
+      window.open(accessLink, '_blank');
+      toast({ 
+        title: 'Link aberto!', 
+        description: `Acesso do entregador aberto em nova guia.` 
+      });
+    }
+  };
+
   const sendDriverLinkViaWhatsApp = async (driver: Driver) => {
     const phone = driver.driver_phone || driver.profile?.phone;
     
@@ -1041,6 +1053,10 @@ export default function DriversManagement() {
                               >
                                 <DollarSign className="h-4 w-4 mr-2" />
                                 Registrar Pagamento
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openDriverAccessLink(driver)}>
+                                <ExternalLink className="h-4 w-4 mr-2" />
+                                Abrir Link
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => copyDriverAccessLink(driver)}>
                                 <Link className="h-4 w-4 mr-2" />
