@@ -213,8 +213,20 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   // Enable real-time waiter call notifications (global - works on any page)
   useWaiterCallNotifications();
 
+  // Detect if running inside Electron (desktop app)
+  const isElectronApp = typeof navigator !== 'undefined' && 
+    (navigator.userAgent.toLowerCase().includes('electron') || 
+     (window as any).process?.versions?.electron);
+
   const handleSignOut = async () => {
     await signOut();
+    
+    // If running in Electron, close the app window
+    if (isElectronApp) {
+      window.close();
+      return;
+    }
+    
     navigate("/auth");
   };
 
