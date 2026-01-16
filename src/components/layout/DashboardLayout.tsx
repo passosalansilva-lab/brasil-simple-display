@@ -45,6 +45,7 @@ import {
   RotateCcw,
   Mail,
   Receipt,
+  Brain,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -84,6 +85,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useSystemLogo } from "@/hooks/useSystemLogo";
 import { useSystemColors } from "@/hooks/useSystemColors";
+import { GlobalSearch } from "./GlobalSearch";
 
 interface NavItem {
   label: string;
@@ -107,6 +109,7 @@ const superAdminNavItems: NavItem[] = [
   { label: "Transações Cartão", href: "/dashboard/admin/card-transactions", icon: CreditCard, roles: ["super_admin"] },
   { label: "Nota Fiscal (NFe)", href: "/dashboard/admin/nfe", icon: FileText, roles: ["super_admin"] },
   { label: "Logs do Sistema", href: "/dashboard/admin/logs", icon: ScrollText, roles: ["super_admin"] },
+  { label: "Logs de IA", href: "/dashboard/admin/ai-logs", icon: Brain, roles: ["super_admin"] },
   { label: "Saúde das Integrações", href: "/dashboard/admin/integrations", icon: Activity, roles: ["super_admin"] },
   { label: "Config. Onboarding", href: "/dashboard/admin/onboarding", icon: BookOpen, roles: ["super_admin"] },
   { label: "Indicações (Admin)", href: "/dashboard/admin/referrals", icon: Crown, roles: ["super_admin"] },
@@ -591,6 +594,11 @@ const canSeeItem = (item: NavItem): boolean => {
           >
             <Menu className="h-5 w-5" />
           </button>
+
+          {/* Global Search */}
+          <div className="hidden md:block">
+            <GlobalSearch />
+          </div>
 
           {/* Alerta de pedidos pendentes + Indicador de conexão realtime + ações */}
           <div className="flex-1 flex items-center justify-end gap-3">
