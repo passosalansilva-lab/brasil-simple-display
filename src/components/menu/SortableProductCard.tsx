@@ -12,6 +12,7 @@ import {
   Star,
   Clock,
   GripVertical,
+  Copy,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -50,6 +51,7 @@ interface SortableProductCardProps {
   product: Product;
   category?: Category;
   onEdit: (product: Product) => void;
+  onDuplicate: (product: Product) => void;
   onToggleActive: (product: Product) => void;
   onToggleFeatured: (product: Product) => void;
   onDelete: (product: Product) => void;
@@ -60,6 +62,7 @@ export function SortableProductCard({
   product,
   category,
   onEdit,
+  onDuplicate,
   onToggleActive,
   onToggleFeatured,
   onDelete,
@@ -135,6 +138,10 @@ export function SortableProductCard({
                     <DropdownMenuItem onClick={() => onEdit(product)}>
                       <Edit className="h-4 w-4 mr-2" />
                       Editar Produto
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onDuplicate(product)}>
+                      <Copy className="h-4 w-4 mr-2" />
+                      Duplicar Produto
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => onToggleActive(product)}>
