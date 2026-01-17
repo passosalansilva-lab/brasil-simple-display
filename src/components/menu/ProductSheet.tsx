@@ -157,7 +157,12 @@ function OptionCard({
     if (priceDisplay === 0 && !hasDiscount) return null;
     
     return (
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1.5 flex-wrap justify-end">
+        {hasDiscount && (
+          <span className="bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap">
+            PROMO
+          </span>
+        )}
         {hasDiscount && originalPrice !== undefined && originalPrice !== priceDisplay && (
           <span className="text-xs text-muted-foreground line-through whitespace-nowrap">
             R$ {originalPrice.toFixed(2)}
@@ -190,11 +195,6 @@ function OptionCard({
         hasImage ? "p-0" : "px-4 py-3"
       )}
     >
-      {hasDiscount && (
-        <div className="absolute top-1 right-1 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-          PROMO
-        </div>
-      )}
       {hasImage ? (
         <div className="flex items-center">
           <div className="w-16 h-16 flex-shrink-0 bg-muted">
