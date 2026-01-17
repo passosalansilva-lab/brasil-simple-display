@@ -30,6 +30,10 @@ CREATE INDEX IF NOT EXISTS idx_portal_posts_category ON public.portal_posts(cate
 -- Enable RLS na tabela de categorias
 ALTER TABLE public.portal_categories ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Anyone can view active categories" ON public.portal_categories;
+DROP POLICY IF EXISTS "Admins can manage categories" ON public.portal_categories;
+
 -- RLS: todos autenticados podem ver categorias ativas
 CREATE POLICY "Anyone can view active categories"
 ON public.portal_categories FOR SELECT
@@ -93,6 +97,10 @@ ALTER TABLE public.portal_post_reactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.portal_post_comments ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies para portal_posts
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Anyone can view published posts" ON public.portal_posts;
+DROP POLICY IF EXISTS "Admins can manage posts" ON public.portal_posts;
+
 -- Todos autenticados podem ver posts publicados
 CREATE POLICY "Anyone can view published posts"
 ON public.portal_posts FOR SELECT
@@ -107,6 +115,10 @@ USING (public.has_role(auth.uid(), 'super_admin'))
 WITH CHECK (public.has_role(auth.uid(), 'super_admin'));
 
 -- RLS Policies para portal_post_reactions
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Anyone can view reactions" ON public.portal_post_reactions;
+DROP POLICY IF EXISTS "Users can manage own reactions" ON public.portal_post_reactions;
+
 -- Todos autenticados podem ver reações
 CREATE POLICY "Anyone can view reactions"
 ON public.portal_post_reactions FOR SELECT
@@ -121,6 +133,13 @@ USING (user_id = auth.uid())
 WITH CHECK (user_id = auth.uid());
 
 -- RLS Policies para portal_post_comments
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Anyone can view comments" ON public.portal_post_comments;
+DROP POLICY IF EXISTS "Users can insert own comments" ON public.portal_post_comments;
+DROP POLICY IF EXISTS "Users can manage own comments" ON public.portal_post_comments;
+DROP POLICY IF EXISTS "Users can delete own comments" ON public.portal_post_comments;
+DROP POLICY IF EXISTS "Admins can delete any comment" ON public.portal_post_comments;
+
 -- Todos autenticados podem ver comentários
 CREATE POLICY "Anyone can view comments"
 ON public.portal_post_comments FOR SELECT
@@ -157,6 +176,12 @@ VALUES ('portal-videos', 'portal-videos', true, 524288000) -- 500MB limit
 ON CONFLICT (id) DO NOTHING;
 
 -- Storage policies para portal-videos
+-- Drop existing storage policies first
+DROP POLICY IF EXISTS "Anyone can view portal videos" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can upload portal videos" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can update portal videos" ON storage.objects;
+DROP POLICY IF EXISTS "Admins can delete portal videos" ON storage.objects;
+
 CREATE POLICY "Anyone can view portal videos"
 ON storage.objects FOR SELECT
 TO public
