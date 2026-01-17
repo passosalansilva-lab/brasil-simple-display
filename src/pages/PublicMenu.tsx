@@ -1579,14 +1579,15 @@ function PublicMenuContent() {
                 <Badge
                   variant="secondary"
                   className={cn(
-                    "h-5 px-2 flex items-center gap-1 rounded-full text-[11px]",
-                    isActuallyOpen ? "badge-open" : "badge-closed",
-                    company.primary_color && !isLightColor(company.primary_color) && "text-white/90"
+                    "h-5 px-2 flex items-center gap-1 rounded-full text-[11px] font-medium shadow-sm",
+                    isActuallyOpen 
+                      ? "bg-emerald-500/90 text-white border border-emerald-400/50" 
+                      : "bg-gray-100 text-gray-700 border border-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
                   )}
                 >
                   <span className={cn(
                     "inline-flex h-1.5 w-1.5 rounded-full",
-                    isActuallyOpen ? "bg-emerald-400" : "bg-red-400"
+                    isActuallyOpen ? "bg-white" : "bg-red-500"
                   )} />
                   {isActuallyOpen ? "Aberto agora" : "Fechado"}
                 </Badge>
