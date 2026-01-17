@@ -521,6 +521,12 @@ export function HalfHalfPizzaModal({
       // NOTA: sizeGroups está vazio pois o tamanho já foi selecionado no step "size"
       setSizeOptions(sizeGroups);
 
+      // Segurança extra: se algum grupo "tamanho" veio selecionado de uma versão anterior,
+      // remove para não duplicar o preço no total.
+      setSelectedOptions((prev) =>
+        prev.filter((opt) => !normalize(opt.group_name).includes("tamanho"))
+      );
+
       setDoughOptions(doughGroups);
       setCrustOptions(enableCrust ? crust : []);
       setAddonOptions(enableAddons ? addons : []);
@@ -602,7 +608,10 @@ export function HalfHalfPizzaModal({
     }
 
     // Add options price (crust, addons, etc.)
+    // IMPORTANTE: nunca somar grupo de "tamanho" aqui (evita duplicar o preço do tamanho)
     const optionsPrice = selectedOptions.reduce((sum, opt) => {
+      const groupName = (opt.group_name || "").toLowerCase();
+      if (groupName.includes("tamanho")) return sum;
       return sum + opt.price_modifier;
     }, 0);
 
