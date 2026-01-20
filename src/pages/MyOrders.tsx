@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useCart } from "@/hooks/useCart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -139,7 +138,6 @@ export default function MyOrders() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const { addItem, clearCart, setCompanySlug } = useCart();
 
   // Slug da empresa usado para voltar ao cardápio e aplicar tema
   const slug = searchParams.get("company");
@@ -370,23 +368,29 @@ export default function MyOrders() {
         return;
       }
 
-      // OK: refaz carrinho
-      clearCart();
-      setCompanySlug(slug);
+      // OK: refaz carrinho (persistindo ANTES do redirect para evitar race com unmount)
+      const cartItems = order.order_items.map((item, idx) => {
+        const safeOptions = (item.options || []).map((o) => ({
+          name: o.name,
+          groupName: o.groupName,
+          priceModifier: o.priceModifier,
+        }));
 
-      for (const item of order.order_items) {
-        addItem({
+        return {
+          id: `reorder-${item.product_id}-${Date.now()}-${idx}`,
           productId: item.product_id,
           productName: item.product_name,
           price: item.unit_price,
           quantity: item.quantity,
-          options: (item.options || []).map((o) => ({
-            name: o.name,
-            groupName: o.groupName,
-            priceModifier: o.priceModifier,
-          })),
+          options: safeOptions,
           notes: item.notes || undefined,
-        });
+        };
+      });
+
+      try {
+        localStorage.setItem("menupro_cart", JSON.stringify({ items: cartItems, companySlug: slug }));
+      } catch (e) {
+        console.error("Erro ao salvar carrinho para repetir pedido:", e);
       }
 
       toast({
@@ -395,6 +399,7 @@ export default function MyOrders() {
       });
 
       navigate(`/menu/${slug}`);
+      return;
     } catch (error: any) {
       console.error("Error repeating order:", error);
       toast({
