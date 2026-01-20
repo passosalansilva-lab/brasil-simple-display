@@ -267,6 +267,10 @@ export function CheckoutPage({ companyId, companyName, companySlug, companyPhone
     customerId?: string | null;
   } | null>(null);
 
+  // Manual PIX (transferência) - usado quando a loja exibe a chave PIX no checkout
+  // e o cliente opta por pagar via PIX mesmo escolhendo "Dinheiro" ou "Cartão na entrega".
+  const [manualPixSelected, setManualPixSelected] = useState(false);
+
   const {
     register,
     handleSubmit,
