@@ -251,6 +251,14 @@ export default function Index() {
     []
   );
 
+  const pricingGridCols = useMemo(() => {
+    const count = plans.length;
+    if (count >= 4) return "lg:grid-cols-4";
+    if (count === 3) return "lg:grid-cols-3";
+    if (count === 2) return "lg:grid-cols-2";
+    return "lg:grid-cols-1";
+  }, [plans.length]);
+
   useEffect(() => {
     loadStats();
     loadTestimonials();
@@ -619,8 +627,8 @@ export default function Index() {
                   animate={{ opacity: 1, y: 0 }}
                   className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20"
                 >
-                  <div className="px-6 py-3 rounded-full bg-white shadow-xl border border-gray-100">
-                    <span className="text-base font-bold text-gray-900">{foodImages[currentFoodIndex].label}</span>
+                  <div className="px-6 py-3 rounded-full bg-card shadow-xl border border-border">
+                    <span className="text-base font-bold text-foreground">{foodImages[currentFoodIndex].label}</span>
                   </div>
                 </motion.div>
 
@@ -752,13 +760,13 @@ export default function Index() {
       </section>
 
       {/* Features Section - Bento Grid */}
-      <section id="features" className="py-20 lg:py-28 bg-muted/30">
+      <section id="features" className="py-10 lg:py-12 bg-muted/30">
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-8"
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border shadow-card mb-6">
               <Sparkles className="w-4 h-4 text-primary" />
@@ -799,7 +807,7 @@ export default function Index() {
       </section>
 
       {/* Integrations */}
-      <section className="py-16 bg-background border-y border-border">
+      <section className="py-10 lg:py-12 bg-background border-y border-border">
         <div className="container max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <div className="lg:w-1/3">
@@ -1061,7 +1069,9 @@ export default function Index() {
             </div>
           ) : plans.length > 0 ? (
             <>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-12">
+              <div
+                className={`grid md:grid-cols-2 ${pricingGridCols} gap-6 max-w-6xl mx-auto mb-12 justify-items-center`}
+              >
                 {plans.map((plan, index) => {
                   const isPopular = index === 2;
                   return (
@@ -1071,7 +1081,7 @@ export default function Index() {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.1 }}
-                      className={`relative p-6 lg:p-8 rounded-3xl border-2 transition-all duration-300 ${
+                      className={`relative w-full max-w-sm p-6 lg:p-8 rounded-3xl border-2 transition-all duration-300 ${
                         isPopular
                           ? "border-orange-400 bg-gradient-to-b from-orange-50 to-white shadow-xl scale-105"
                           : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-lg"
