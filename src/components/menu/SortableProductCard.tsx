@@ -56,6 +56,7 @@ interface SortableProductCardProps {
   onToggleFeatured: (product: Product) => void;
   onDelete: (product: Product) => void;
   isDragging?: boolean;
+  disabled?: boolean;
 }
 
 export function SortableProductCard({
@@ -66,6 +67,7 @@ export function SortableProductCard({
   onToggleActive,
   onToggleFeatured,
   onDelete,
+  disabled = false,
 }: SortableProductCardProps) {
   const {
     attributes,
@@ -93,9 +95,9 @@ export function SortableProductCard({
         <div className="flex gap-4">
           {/* Drag Handle */}
           <div
-            {...attributes}
-            {...listeners}
-            className="flex items-center cursor-grab active:cursor-grabbing touch-none"
+            {...(disabled ? {} : attributes)}
+            {...(disabled ? {} : listeners)}
+            className={`flex items-center touch-none ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-grab active:cursor-grabbing'}`}
           >
             <GripVertical className="h-5 w-5 text-muted-foreground" />
           </div>
@@ -130,21 +132,21 @@ export function SortableProductCard({
                 </p>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" disabled={disabled}>
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onEdit(product)}>
+                    <DropdownMenuItem onClick={() => !disabled && onEdit(product)} disabled={disabled}>
                       <Edit className="h-4 w-4 mr-2" />
                       Editar Produto
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onDuplicate(product)}>
+                    <DropdownMenuItem onClick={() => !disabled && onDuplicate(product)} disabled={disabled}>
                       <Copy className="h-4 w-4 mr-2" />
                       Duplicar Produto
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => onToggleActive(product)}>
+                    <DropdownMenuItem onClick={() => !disabled && onToggleActive(product)} disabled={disabled}>
                       {product.is_active ? (
                         <>
                           <EyeOff className="h-4 w-4 mr-2" />
@@ -163,7 +165,8 @@ export function SortableProductCard({
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={() => onDelete(product)}
+                      onClick={() => !disabled && onDelete(product)}
+                      disabled={disabled}
                       className="text-destructive"
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
@@ -215,6 +218,7 @@ export function SortableProductCard({
                 variant="outline"
                 size="sm"
                 onClick={() => onEdit(product)}
+                disabled={disabled}
               >
                 <Edit className="h-3 w-3 mr-1" />
                 Editar

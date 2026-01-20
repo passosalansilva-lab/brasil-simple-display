@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   DndContext,
   closestCenter,
@@ -101,6 +102,7 @@ interface Combo {
 export default function MenuManagement() {
   const { user, staffCompany } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { getDraft: getCategoryDraft, saveDraft: saveCategoryDraft, clearDraft: clearCategoryDraft } = useFormDraft<CategoryFormDraft>('category');
   const { getDraft: getProductDraft, clearDraft: clearProductDraft } = useFormDraft<any>('product');
 
@@ -111,6 +113,8 @@ export default function MenuManagement() {
   const [publishingMode, setPublishingMode] = useState<'publish' | 'unpublish'>('publish');
 
   const [loading, setLoading] = useState(true);
+  const [isStoreConfigured, setIsStoreConfigured] = useState(true);
+  const [missingStoreFields, setMissingStoreFields] = useState<string[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [combos, setCombos] = useState<Combo[]>([]);
@@ -208,7 +212,24 @@ export default function MenuManagement() {
     }
   }, [categoryDialog, saveCategoryDraftIfMeaningful]);
 
+  const configGuard = useCallback(
+    (actionLabel: string) => {
+      if (isStoreConfigured) return true;
+      toast({
+        title: 'Finalize os dados da loja primeiro',
+        description:
+          'Antes de criar ou editar o cardápio, configure nome, logo, telefone e endereço da sua loja.',
+        variant: 'destructive',
+      });
+      console.warn(`[menu] blocked action="${actionLabel}" missing=`, missingStoreFields);
+      navigate('/dashboard/store');
+      return false;
+    },
+    [isStoreConfigured, missingStoreFields, navigate, toast],
+  );
+
   const handleContinueProductDraft = () => {
+    if (!configGuard('continueProductDraft')) return;
     setProductSheet({ open: true, product: null, categoryId: null });
     setPendingProductDraft(null);
   };
@@ -219,6 +240,7 @@ export default function MenuManagement() {
   };
 
   const handleContinueCategoryDraft = () => {
+    if (!configGuard('continueCategoryDraft')) return;
     const draft = getCategoryDraft();
     if (draft) {
       setCategoryType(draft.data.type || 'normal');
@@ -262,12 +284,12 @@ export default function MenuManagement() {
       const companyQuery = staffCompany?.companyId
         ? supabase
             .from('companies')
-            .select('id, slug, menu_published')
+            .select('id, slug, menu_published, name, phone, address, logo_url')
             .eq('id', staffCompany.companyId)
             .single()
         : supabase
             .from('companies')
-            .select('id, slug, menu_published')
+            .select('id, slug, menu_published, name, phone, address, logo_url')
             .eq('owner_id', user.id)
             .single();
 
@@ -277,6 +299,15 @@ export default function MenuManagement() {
       setCompanyId(company.id);
       setCompanySlug(company.slug);
       setMenuPublished(!!company.menu_published);
+
+      const missing: string[] = [];
+      if (!company?.name || !String(company.name).trim()) missing.push('nome');
+      if (!company?.logo_url) missing.push('logo');
+      if (!company?.phone) missing.push('telefone');
+      if (!company?.address) missing.push('endereço');
+
+      setMissingStoreFields(missing);
+      setIsStoreConfigured(missing.length === 0);
 
       const [{ data: categoriesData, error: categoriesError }, { data: productsData, error: productsError }, { data: combosData, error: combosError }, { data: pizzaCategoriesData, error: pizzaCategoriesError }, { data: acaiCategoriesData, error: acaiCategoriesError }] =
         await Promise.all([
@@ -459,6 +490,11 @@ export default function MenuManagement() {
 
   const toggleMenuPublished = async () => {
     if (!companyId || publishingMenu) return;
+
+    if (!isStoreConfigured) {
+      configGuard('toggleMenuPublished');
+      return;
+    }
 
     const newValue = !menuPublished;
 
@@ -681,14 +717,17 @@ export default function MenuManagement() {
   };
 
   const openNewProduct = (categoryId: string) => {
+    if (!configGuard('openNewProduct')) return;
     setProductSheet({ open: true, product: null, categoryId });
   };
  
   const openEditProduct = (product: Product) => {
+    if (!configGuard('openEditProduct')) return;
     setProductSheet({ open: true, product, categoryId: product.category_id });
   };
 
   const duplicateProduct = (product: Product) => {
+    if (!configGuard('duplicateProduct')) return;
     // Create a copy with modified name to indicate it's a duplicate
     // Store the original product ID to copy pizza configurations
     const originalProductId = product.id;
