@@ -553,7 +553,7 @@ export function POSProductModal({ product, open, onClose, onAddToCart }: POSProd
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
-        className="sm:max-w-lg w-[95vw] max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0"
+        className="sm:max-w-2xl w-[95vw] h-[90vh] sm:h-[85vh] overflow-hidden flex flex-col p-0 gap-0"
         aria-describedby={undefined}
       >
         {/* Header with product info */}
