@@ -649,7 +649,7 @@ export default function ManualOrderPOS() {
           </div>
 
           {/* Order Summary Section */}
-          <div className="flex flex-col bg-muted/30 border-t lg:border-t-0 lg:overflow-hidden min-h-[400px] lg:min-h-0">
+          <div className="flex flex-col bg-muted/30 border-t lg:border-t-0 lg:overflow-hidden min-h-[400px] lg:min-h-0 lg:col-span-2">
             <ScrollArea className="flex-1 p-4">
               <div className="space-y-6">
                 {/* Cart items */}
