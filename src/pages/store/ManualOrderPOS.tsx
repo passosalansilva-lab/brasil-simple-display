@@ -532,7 +532,7 @@ export default function ManualOrderPOS() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout contentClassName="p-0">
       <div className="flex flex-col lg:h-[calc(100vh-4rem)]">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b bg-background sticky top-0 z-10">
