@@ -95,13 +95,16 @@ export function PrintComanda({
       return iframeRef.current;
     }
     const iframe = document.createElement('iframe');
+    // In Electron/Chromium, printing from a zero-sized/hidden iframe can result in blank preview.
+    // Keep it off-screen but with a real size so layout/print preview can render reliably.
     iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
+    iframe.style.left = '-10000px';
+    iframe.style.top = '0';
+    iframe.style.width = '800px';
+    iframe.style.height = '600px';
     iframe.style.border = 'none';
-    iframe.style.visibility = 'hidden';
+    iframe.style.opacity = '0';
+    iframe.style.pointerEvents = 'none';
     document.body.appendChild(iframe);
     iframeRef.current = iframe;
     return iframe;
@@ -325,11 +328,24 @@ export function PrintComanda({
     `);
     doc.close();
 
-    setTimeout(() => {
-      iframe.contentWindow?.focus();
-      iframe.contentWindow?.print();
+    setTimeout(async () => {
+      const win = iframe.contentWindow;
+      if (!win) return;
+
+      // Wait for fonts/resources to be ready (helps Electron print preview not render blank)
+      const fontsReady = (win.document as any)?.fonts?.ready;
+      if (fontsReady?.then) {
+        try {
+          await fontsReady;
+        } catch {
+          // ignore
+        }
+      }
+
+      win.focus();
+      win.print();
       onPrint?.();
-    }, 150);
+    }, 300);
   }, [comanda.number, getOrCreateIframe, onPrint]);
 
   return (
