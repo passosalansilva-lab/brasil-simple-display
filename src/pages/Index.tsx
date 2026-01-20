@@ -215,6 +215,42 @@ export default function Index() {
     []
   );
 
+  const socialProof = useMemo(
+    () => ({
+      logos: [
+        "Pizzarias",
+        "Hamburguerias",
+        "Restaurantes",
+        "Açaí",
+        "Japoneses",
+        "Lanchonetes",
+      ],
+      seals: [
+        {
+          icon: Shield,
+          title: "Operação estável",
+          desc: "Fluxos testados para dia a dia do delivery",
+        },
+        {
+          icon: CreditCard,
+          title: "Pagamentos",
+          desc: "Integrações com PIX e cartão",
+        },
+        {
+          icon: Lock,
+          title: "Segurança",
+          desc: "Boas práticas de proteção de conta",
+        },
+        {
+          icon: Headset,
+          title: "Suporte",
+          desc: "WhatsApp para dúvidas e onboarding",
+        },
+      ],
+    }),
+    []
+  );
+
   useEffect(() => {
     loadStats();
     loadTestimonials();
@@ -624,6 +660,68 @@ export default function Index() {
                 </motion.div>
               </div>
             </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Social proof */}
+      <section className="py-10 lg:py-12 bg-background">
+        <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-[1fr_380px] gap-6 lg:gap-10 items-start">
+            <div>
+              <div className="flex flex-wrap items-center gap-3 mb-5">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted border border-border">
+                  <Shield className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-semibold text-foreground">Prova de confiança</span>
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  Usado por estabelecimentos que precisam de estabilidade e agilidade.
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {socialProof.logos.map((name) => (
+                  <div
+                    key={name}
+                    className="px-4 py-2 rounded-xl bg-card border border-border shadow-card text-sm font-semibold text-foreground/80"
+                  >
+                    {name}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-3xl bg-card border border-border shadow-card p-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-2xl bg-muted/40 border border-border p-4">
+                  <div className="text-2xl font-black text-foreground">
+                    {stats ? formatNumber(stats.total_companies) : "—"}
+                  </div>
+                  <div className="text-sm text-muted-foreground font-medium">estabelecimentos</div>
+                </div>
+                <div className="rounded-2xl bg-muted/40 border border-border p-4">
+                  <div className="flex items-baseline gap-1">
+                    <div className="text-2xl font-black text-foreground">{stats ? stats.avg_rating.toFixed(1) : "—"}</div>
+                    <Star className="w-4 h-4 text-primary fill-primary" />
+                  </div>
+                  <div className="text-sm text-muted-foreground font-medium">avaliação média</div>
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-3">
+                {socialProof.seals.map((seal) => (
+                  <div key={seal.title} className="flex items-start gap-3 rounded-2xl border border-border bg-background/60 p-3">
+                    <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center flex-shrink-0">
+                      <seal.icon className="w-5 h-5 text-accent-foreground" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-foreground">{seal.title}</div>
+                      <div className="text-sm text-muted-foreground leading-snug">{seal.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
