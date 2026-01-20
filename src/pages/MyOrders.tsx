@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/hooks/useCart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import {
   XCircle,
   Truck,
   ArrowLeft,
+  RotateCcw,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -74,10 +76,12 @@ type OrderStatus =
 
 interface OrderItem {
   id: string;
+  product_id: string;
   product_name: string;
   quantity: number;
   unit_price: number;
   total_price: number;
+  options?: { name: string; priceModifier: number; groupName?: string; halfHalfFlavorProductIds?: string[] }[] | null;
   notes?: string | null;
 }
 
@@ -135,6 +139,7 @@ export default function MyOrders() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { addItem, clearCart, setCompanySlug } = useCart();
 
   // Slug da empresa usado para voltar ao cardápio e aplicar tema
   const slug = searchParams.get("company");
@@ -173,7 +178,9 @@ export default function MyOrders() {
   const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [companyPrimaryHsl, setCompanyPrimaryHsl] = useState<string | null>(null);
+  const [companyId, setCompanyId] = useState<string | null>(null);
   const [updatingOrderIds, setUpdatingOrderIds] = useState<string[]>([]);
+  const [repeatingOrderId, setRepeatingOrderId] = useState<string | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const updateTimeoutsRef = useRef<Record<string, number>>({});
@@ -196,10 +203,11 @@ export default function MyOrders() {
 
     supabase
       .from("companies_public")
-      .select("primary_color")
+      .select("id, primary_color")
       .eq("slug", slug)
       .maybeSingle()
       .then(({ data }) => {
+        if (data?.id) setCompanyId(data.id);
         if (data?.primary_color) {
           const hsl = hexToHsl(data.primary_color);
           if (hsl) {
