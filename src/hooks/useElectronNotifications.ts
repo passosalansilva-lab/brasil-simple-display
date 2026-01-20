@@ -11,18 +11,9 @@ interface ElectronNotificationOptions {
   onClick?: () => void;
 }
 
-interface ElectronAPI {
-  minimize?: () => void;
-  maximize?: () => void;
-  showNotification?: (options: ElectronNotificationOptions) => void;
-  onNotificationClick?: (callback: (tag: string) => void) => void;
-}
+// Note: `window.electronAPI` typing lives in `src/types/electron-api.d.ts` to avoid
+// TS2717 conflicts when multiple modules try to redeclare it.
 
-declare global {
-  interface Window {
-    electronAPI?: ElectronAPI;
-  }
-}
 
 /**
  * Check if we're running in Electron environment
