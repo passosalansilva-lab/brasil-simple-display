@@ -32,6 +32,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { GroupedOptionsDisplay } from '@/components/ui/grouped-options-display';
@@ -93,7 +94,14 @@ export default function ManualOrderPOS() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, staffCompany } = useAuth();
+  const { allFeatures, hasFeatureAccess } = useFeatureAccess();
   const { toast } = useToast();
+
+  const tablesEnabled = useMemo(() => {
+    const tablesFeature = allFeatures.find((f) => f.key === 'tables');
+    if (!tablesFeature?.is_active) return false;
+    return hasFeatureAccess('tables').hasAccess;
+  }, [allFeatures, hasFeatureAccess]);
 
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [companyData, setCompanyData] = useState<{ delivery_fee: number; min_order_value: number } | null>(null);
@@ -152,6 +160,8 @@ export default function ManualOrderPOS() {
 
   // Check for table params
   useEffect(() => {
+    if (!tablesEnabled) return;
+
     const tableId = searchParams.get('table');
     const sessionId = searchParams.get('session');
     if (sessionId) {
@@ -169,7 +179,18 @@ export default function ManualOrderPOS() {
           if (data) setTableNumber(data.table_number);
         });
     }
-  }, [searchParams]);
+  }, [searchParams, tablesEnabled]);
+
+  // If Tables feature is disabled, ensure POS can't stay in "table" mode
+  useEffect(() => {
+    if (tablesEnabled) return;
+    if (deliveryType !== 'table') return;
+
+    setDeliveryType('pickup');
+    setTableSessionId(null);
+    setTableNumber(null);
+    setShowTableSelector(false);
+  }, [tablesEnabled, deliveryType]);
 
   const loadData = async () => {
     if (!user) return;
@@ -741,26 +762,30 @@ export default function ManualOrderPOS() {
                     <MapPin className="h-4 w-4" />
                     Tipo de Atendimento
                   </h3>
-                  <div className="grid grid-cols-3 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDeliveryType('table');
-                        if (!tableNumber) {
-                          setShowTableSelector(true);
-                        }
-                      }}
-                      className={cn(
-                        'flex flex-col items-center gap-2 p-3 border rounded-lg cursor-pointer transition-colors',
-                        deliveryType === 'table' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                      )}
-                    >
-                      <UtensilsCrossed className="h-5 w-5" />
-                      <span className="text-sm font-medium">Mesa</span>
-                      {tableNumber && deliveryType === 'table' && (
-                        <span className="text-xs text-primary font-bold">#{tableNumber}</span>
-                      )}
-                    </button>
+                  <div className={cn('grid gap-2', tablesEnabled ? 'grid-cols-3' : 'grid-cols-2')}>
+                    {tablesEnabled && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDeliveryType('table');
+                          if (!tableNumber) {
+                            setShowTableSelector(true);
+                          }
+                        }}
+                        className={cn(
+                          'flex flex-col items-center gap-2 p-3 border rounded-lg cursor-pointer transition-colors',
+                          deliveryType === 'table'
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border hover:border-primary/50'
+                        )}
+                      >
+                        <UtensilsCrossed className="h-5 w-5" />
+                        <span className="text-sm font-medium">Mesa</span>
+                        {tableNumber && deliveryType === 'table' && (
+                          <span className="text-xs text-primary font-bold">#{tableNumber}</span>
+                        )}
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => setDeliveryType('pickup')}
