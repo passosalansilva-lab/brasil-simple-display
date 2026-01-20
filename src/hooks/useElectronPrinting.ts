@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { isElectron } from "@/hooks/useElectronNotifications";
 
+
 export interface ElectronPrinter {
   name: string;
   displayName?: string;
@@ -18,16 +19,8 @@ export interface ElectronPrintHtmlOptions {
   landscape?: boolean;
 }
 
-interface ElectronPrintingAPI {
-  getPrinters?: () => Promise<ElectronPrinter[]>;
-  printHtml?: (options: ElectronPrintHtmlOptions) => Promise<{ success: boolean; error?: string } | void>;
-}
-
-declare global {
-  interface Window {
-    electronAPI?: ElectronPrintingAPI;
-  }
-}
+// Note: `window.electronAPI` is typed centrally in `useElectronNotifications.ts`.
+// Do not redeclare it here (it breaks TS interface merging across modules).
 
 const LS_DIRECT = "electron.print.direct";
 const LS_PRINTER = "electron.print.printer";
