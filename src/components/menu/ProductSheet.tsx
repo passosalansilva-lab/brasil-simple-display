@@ -274,6 +274,8 @@ export function ProductSheet({ product, open, onClose, primaryColor, promotionId
 
   useEffect(() => {
     if (open && product) {
+      // Reset selections when opening a product so pizza size can be preselected reliably
+      setSelectedOptions([]);
       loadOptionGroups();
       loadIngredients();
       if (promotionId) {
@@ -751,6 +753,30 @@ export function ProductSheet({ product, open, onClose, primaryColor, promotionId
 
       groups.sort((a, b) => a.sort_order - b.sort_order);
       setOptionGroups(groups);
+
+      // Pizza: when sizes exist, default to the biggest size (highest price)
+      const pizzaSizeGroup = groups.find((g) => g.id === 'pizza-size');
+      if (pizzaSizeGroup?.options?.length) {
+        const biggestSize = [...pizzaSizeGroup.options].sort(
+          (a, b) => Number(a.price_modifier ?? 0) - Number(b.price_modifier ?? 0)
+        ).at(-1);
+
+        if (biggestSize) {
+          setSelectedOptions((prev) => {
+            const withoutSize = prev.filter((o) => o.groupId !== 'pizza-size');
+            return [
+              ...withoutSize,
+              {
+                groupId: 'pizza-size',
+                groupName: pizzaSizeGroup.name,
+                optionId: biggestSize.id,
+                name: biggestSize.name,
+                priceModifier: Number(biggestSize.price_modifier ?? 0),
+              },
+            ];
+          });
+        }
+      }
 
       if (product.product_options && product.product_options.length > 0 && groups.length === 0) {
         setOptionGroups([

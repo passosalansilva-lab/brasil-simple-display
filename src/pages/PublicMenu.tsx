@@ -1134,10 +1134,8 @@ function PublicMenuContent() {
             (a: any, b: any) => Number(a.price_modifier || 0) - Number(b.price_modifier || 0)
           );
           const lowestPrice = Number(sorted[0].price_modifier || 0);
-          
-          if (lowestPrice > 0) {
-            productPriceMap[productId] = lowestPrice;
-          }
+          // Guardar mesmo se for 0 (o que importa é existir tamanho configurado)
+          productPriceMap[productId] = lowestPrice;
         });
 
         // Usar o productPriceMap no estado (reaproveitando pizzaCategoryBasePrices com chave de product_id)
@@ -1247,7 +1245,7 @@ function PublicMenuContent() {
 
   const getDisplayPrice = (product: Product) => {
     // Para pizzas com tamanhos configurados POR PRODUTO - usar preço do menor tamanho
-    if (pizzaCategoryBasePrices[product.id]) {
+    if (Object.prototype.hasOwnProperty.call(pizzaCategoryBasePrices, product.id)) {
       return pizzaCategoryBasePrices[product.id];
     }
     // Açaí com tamanhos configurados por categoria - usar preço do maior tamanho
@@ -1860,9 +1858,9 @@ function PublicMenuContent() {
           <div className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
             {featuredProducts.map((product) => {
               const displayPrice = getDisplayPrice(product);
-              const isPizzaWithSizes = !!product.category_id && 
-                pizzaCategoryIdsArray.includes(product.category_id) && 
-                !!pizzaCategoryBasePrices[product.id];
+              const isPizzaWithSizes = !!product.category_id &&
+                pizzaCategoryIdsArray.includes(product.category_id) &&
+                Object.prototype.hasOwnProperty.call(pizzaCategoryBasePrices, product.id);
               return (
                 <FeaturedProductCard
                   key={product.id}
@@ -1951,9 +1949,9 @@ function PublicMenuContent() {
                    acaiCategoryIds.includes(product.category_id) && 
                    !!acaiCategoryBasePrices[product.category_id];
                  // Pizza mostra "A partir de" se tiver tamanhos configurados POR PRODUTO
-                 const isPizzaWithSizes = !!product.category_id && 
-                   pizzaCategoryIdsArray.includes(product.category_id) && 
-                   !!pizzaCategoryBasePrices[product.id];
+                  const isPizzaWithSizes = !!product.category_id &&
+                    pizzaCategoryIdsArray.includes(product.category_id) &&
+                    Object.prototype.hasOwnProperty.call(pizzaCategoryBasePrices, product.id);
                  const promotionDiscount = getProductPromotionDiscount(product, promotions);
                  return (
                    <ProductCard
