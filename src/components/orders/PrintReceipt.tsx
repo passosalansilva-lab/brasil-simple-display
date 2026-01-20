@@ -3,6 +3,8 @@ import { Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useElectronPrinting } from '@/hooks/useElectronPrinting';
+import { ElectronPrintSettingsDialog } from '@/components/printing/ElectronPrintSettingsDialog';
 
 interface OrderItem {
   id: string;
@@ -79,19 +81,32 @@ export function PrintReceipt({
   const kitchenPrintRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
+  const {
+    isElectronApp,
+    supportsNativePrint,
+    directPrintEnabled,
+    setDirectPrintEnabled,
+    printers,
+    selectedPrinter,
+    setSelectedPrinter,
+    printHtml,
+  } = useElectronPrinting();
+
   // Cria ou reutiliza iframe invisível para impressão
   const getOrCreateIframe = useCallback(() => {
     if (iframeRef.current) {
       return iframeRef.current;
     }
     const iframe = document.createElement('iframe');
+    // Em Electron/Chromium, iframe com tamanho zero/hidden pode renderizar preview em branco.
     iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
+    iframe.style.left = '-10000px';
+    iframe.style.top = '0';
+    iframe.style.width = '800px';
+    iframe.style.height = '600px';
     iframe.style.border = 'none';
-    iframe.style.visibility = 'hidden';
+    iframe.style.opacity = '0';
+    iframe.style.pointerEvents = 'none';
     document.body.appendChild(iframe);
     iframeRef.current = iframe;
     return iframe;
@@ -107,13 +122,14 @@ export function PrintReceipt({
     };
   }, []);
 
-  const handlePrint = useCallback((isKitchen: boolean = false) => {
-    const printContent = isKitchen ? kitchenPrintRef.current : printRef.current;
-    if (!printContent) return;
+  const handlePrint = useCallback(
+    async (isKitchen: boolean = false) => {
+      const printContent = isKitchen ? kitchenPrintRef.current : printRef.current;
+      if (!printContent) return;
 
-    const html = printContent.innerHTML;
+      const html = printContent.innerHTML;
 
-    const styles = `
+      const styles = `
       <style>
         @page {
           size: 80mm auto;
@@ -298,31 +314,69 @@ export function PrintReceipt({
       </style>
     `;
 
-    const iframe = getOrCreateIframe();
-    const doc = iframe.contentDocument || iframe.contentWindow?.document;
-    if (!doc) return;
-
-    doc.open();
-    doc.write(`
+      const title = `${isKitchen ? 'Cozinha' : 'Comanda'} #${order.id.slice(0, 8)}`;
+      const documentHtml = `
       <!DOCTYPE html>
       <html>
         <head>
-          <title>${isKitchen ? 'Cozinha' : 'Comanda'} #${order.id.slice(0, 8)}</title>
+          <title>${title}</title>
           ${styles}
         </head>
         <body>
           ${html}
         </body>
       </html>
-    `);
-    doc.close();
+    `;
 
-    // Aguarda o carregamento do conteúdo e dispara a impressão
-    setTimeout(() => {
-      iframe.contentWindow?.focus();
-      iframe.contentWindow?.print();
-    }, 150);
-  }, [order.id, getOrCreateIframe]);
+      // Prefer native direct print in Electron when enabled
+      if (isElectronApp && supportsNativePrint && directPrintEnabled) {
+        const res = await printHtml({
+          html: documentHtml,
+          title,
+          deviceName: selectedPrinter || undefined,
+          silent: true,
+        });
+
+        if (res?.success) return;
+        // fallback to browser print below
+      }
+
+      const iframe = getOrCreateIframe();
+      const doc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!doc) return;
+
+      doc.open();
+      doc.write(documentHtml);
+      doc.close();
+
+      setTimeout(async () => {
+        const win = iframe.contentWindow;
+        if (!win) return;
+
+        const fontsReady = (win.document as any)?.fonts?.ready;
+        if (fontsReady?.then) {
+          try {
+            await fontsReady;
+          } catch {
+            // ignore
+          }
+        }
+
+        win.focus();
+        win.print();
+      }, 300);
+    },
+    [
+      directPrintEnabled,
+      getOrCreateIframe,
+      isElectronApp,
+      order.id,
+      printHtml,
+      printRef,
+      selectedPrinter,
+      supportsNativePrint,
+    ]
+  );
 
   useEffect(() => {
     if (autoPrintEnabled && order.status === 'confirmed') {
