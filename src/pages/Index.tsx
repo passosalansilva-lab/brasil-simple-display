@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,7 +13,6 @@ import {
   CreditCard,
   FileText,
   Package,
-  Globe,
   Mail,
   Phone,
   ChefHat,
@@ -29,6 +28,9 @@ import {
   Play,
   Sparkles,
   ArrowUpRight,
+  Headset,
+  Lock,
+  BadgeCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -182,6 +184,37 @@ export default function Index() {
     setTheme("light");
   }, [setTheme]);
 
+  const navLinks = useMemo(
+    () => [
+      { label: "Funcionalidades", href: "#features" },
+      { label: "Demonstração", href: "#demos" },
+      { label: "Planos", href: "#pricing" },
+      { label: "Contato", href: "#contact" },
+    ],
+    []
+  );
+
+  const trustBullets = useMemo(
+    () => [
+      {
+        icon: BadgeCheck,
+        title: "Sem comissão por pedido",
+        desc: "Você vende direto — sem taxa sobre vendas.",
+      },
+      {
+        icon: Lock,
+        title: "Pagamentos integrados",
+        desc: "PIX e cartão via provedores conhecidos.",
+      },
+      {
+        icon: Headset,
+        title: "Suporte humano",
+        desc: "WhatsApp e atendimento para operação diária.",
+      },
+    ],
+    []
+  );
+
   useEffect(() => {
     loadStats();
     loadTestimonials();
@@ -267,9 +300,9 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans antialiased overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground font-sans antialiased overflow-x-hidden">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 lg:h-20 items-center justify-between">
             <Link to={getDashboardPath()} className="flex items-center">
@@ -277,16 +310,11 @@ export default function Index() {
             </Link>
 
             <nav className="hidden lg:flex items-center gap-1">
-              {[
-                { label: "Funcionalidades", href: "#features" },
-                { label: "Demonstração", href: "#demos" },
-                { label: "Planos", href: "#pricing" },
-                { label: "Contato", href: "#contact" },
-              ].map((link) => (
+              {navLinks.map((link) => (
                 <a
                   key={link.href}
                   href={link.href}
-                  className="px-4 py-2 text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all"
+                  className="px-4 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-all"
                 >
                   {link.label}
                 </a>
@@ -297,7 +325,7 @@ export default function Index() {
               {user ? (
                 <Link
                   to={getDashboardPath()}
-                  className="px-6 py-2.5 rounded-full bg-gray-900 text-white font-semibold hover:bg-gray-800 transition-all"
+                  className="px-6 py-2.5 rounded-full bg-foreground text-background font-semibold hover:opacity-90 transition-all"
                 >
                   Abrir painel
                 </Link>
@@ -305,13 +333,13 @@ export default function Index() {
                 <>
                   <Link
                     to="/auth?mode=login"
-                    className="px-4 py-2.5 text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors"
+                    className="px-4 py-2.5 text-sm font-semibold text-foreground/80 hover:text-foreground transition-colors"
                   >
                     Entrar
                   </Link>
                   <Link
                     to="/auth?mode=signup"
-                    className="px-6 py-2.5 rounded-full bg-gray-900 text-white font-semibold hover:bg-gray-800 transition-all text-sm"
+                    className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-all text-sm"
                   >
                     Começar grátis
                   </Link>
@@ -321,9 +349,9 @@ export default function Index() {
 
             <button
               onClick={() => setOpen(true)}
-              className="lg:hidden p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors"
+              className="lg:hidden p-2.5 rounded-xl bg-muted hover:opacity-90 transition-colors"
             >
-              <Menu className="w-5 h-5 text-gray-700" />
+              <Menu className="w-5 h-5 text-foreground" />
             </button>
           </div>
         </div>
@@ -336,7 +364,7 @@ export default function Index() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm"
+                className="fixed inset-0 z-[60] bg-foreground/60 backdrop-blur-sm"
                 onClick={() => setOpen(false)}
               />
               <motion.div
@@ -344,42 +372,37 @@ export default function Index() {
                 animate={{ x: 0 }}
                 exit={{ x: "100%" }}
                 transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                className="fixed top-0 right-0 h-full w-[85%] max-w-sm bg-white z-[70] shadow-2xl"
+                className="fixed top-0 right-0 h-full w-[85%] max-w-sm bg-card z-[70] shadow-2xl"
               >
                 <div className="p-6 flex flex-col h-full">
                   <div className="flex items-center justify-between mb-10">
                     <ChromaKeyImage src={logoUrl} alt="CardapOn" className="h-9" />
                     <button
                       onClick={() => setOpen(false)}
-                      className="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+                      className="p-2.5 bg-muted hover:opacity-90 rounded-xl transition-colors"
                     >
-                      <X className="w-5 h-5 text-gray-600" />
+                      <X className="w-5 h-5 text-foreground" />
                     </button>
                   </div>
 
                   <nav className="flex flex-col gap-2">
-                    {[
-                      { label: "Funcionalidades", href: "#features" },
-                      { label: "Demonstração", href: "#demos" },
-                      { label: "Planos", href: "#pricing" },
-                      { label: "Contato", href: "#contact" },
-                    ].map((link) => (
+                    {navLinks.map((link) => (
                       <a
                         key={link.href}
                         href={link.href}
                         onClick={() => setOpen(false)}
-                        className="px-4 py-3 text-lg font-semibold text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all"
+                        className="px-4 py-3 text-lg font-semibold text-foreground/80 hover:text-foreground hover:bg-muted rounded-xl transition-all"
                       >
                         {link.label}
                       </a>
                     ))}
                   </nav>
 
-                  <div className="mt-auto pt-6 border-t border-gray-100 flex flex-col gap-3">
+                  <div className="mt-auto pt-6 border-t border-border flex flex-col gap-3">
                     {user ? (
                       <Link
                         to={getDashboardPath()}
-                        className="w-full text-center py-3.5 rounded-xl bg-gray-900 text-white font-semibold"
+                        className="w-full text-center py-3.5 rounded-xl bg-foreground text-background font-semibold"
                         onClick={() => setOpen(false)}
                       >
                         Abrir painel
@@ -388,14 +411,14 @@ export default function Index() {
                       <>
                         <Link
                           to="/auth?mode=login"
-                          className="w-full text-center py-3.5 rounded-xl border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+                          className="w-full text-center py-3.5 rounded-xl border-2 border-border text-foreground/80 font-semibold hover:bg-muted transition-colors"
                           onClick={() => setOpen(false)}
                         >
                           Entrar
                         </Link>
                         <Link
                           to="/auth?mode=signup"
-                          className="w-full text-center py-3.5 rounded-xl bg-gray-900 text-white font-semibold"
+                          className="w-full text-center py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold"
                           onClick={() => setOpen(false)}
                         >
                           Começar grátis
@@ -410,12 +433,12 @@ export default function Index() {
         </AnimatePresence>
       </header>
 
-      {/* Hero Section - Bold Design */}
-      <section className="relative pt-32 lg:pt-40 pb-20 lg:pb-32 overflow-hidden">
+      {/* Hero Section - Editorial + confiança */}
+      <section className="relative pt-28 lg:pt-36 pb-14 lg:pb-20 overflow-hidden">
         {/* Background Elements */}
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-white to-rose-50" />
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-br from-orange-200/40 to-rose-200/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-amber-100/50 to-orange-100/50 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3" />
+        <div className="absolute inset-0 gradient-warm" />
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 bg-primary/10" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] rounded-full blur-3xl translate-y-1/2 -translate-x-1/3 bg-accent/40" />
 
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -431,36 +454,27 @@ export default function Index() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-orange-100 to-rose-100 border border-orange-200/50 mb-6"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card/80 border border-border mb-6 shadow-card"
               >
                 <span className="flex h-2 w-2 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-40" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
                 </span>
-                <span className="text-sm font-semibold text-orange-700">Grátis até R$ 2.000/mês</span>
+                <span className="text-sm font-semibold text-foreground">Grátis até R$ 2.000/mês</span>
               </motion.div>
 
               {/* Headline */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tight text-gray-900 mb-6 leading-[1.1]">
-                Seu delivery
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tight mb-6 leading-[1.06]">
+                Seu delivery,
                 <br />
-                <span className="relative">
-                  <span className="relative z-10 bg-gradient-to-r from-orange-500 via-rose-500 to-orange-600 bg-clip-text text-transparent">
-                    mais lucrativo
-                  </span>
-                  <svg
-                    className="absolute -bottom-2 left-0 w-full h-3 text-orange-200"
-                    viewBox="0 0 200 8"
-                    fill="currentColor"
-                  >
-                    <path d="M0 6C50 0 150 0 200 6V8H0V6Z" />
-                  </svg>
-                </span>
+                <span className="text-gradient">mais confiável</span>
+                <br />
+                <span className="text-foreground">e mais lucrativo</span>
               </h1>
 
-              <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Cardápio digital, gestão de pedidos e entregas em tempo real.
-                <strong className="text-gray-900"> Sem taxa sobre vendas.</strong>
+              <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                Cardápio digital, gestão de pedidos e entregas.
+                <strong className="text-foreground"> Experiência profissional do pedido ao pós-venda.</strong>
               </p>
 
               {/* CTAs */}
@@ -468,7 +482,7 @@ export default function Index() {
                 <Button
                   size="lg"
                   asChild
-                  className="bg-gray-900 hover:bg-gray-800 text-white px-8 h-14 text-base font-bold rounded-xl shadow-xl shadow-gray-900/20 hover:shadow-2xl hover:scale-[1.02] transition-all duration-200"
+                  className="bg-primary text-primary-foreground px-8 h-14 text-base font-bold rounded-xl shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-200"
                 >
                   <Link to="/auth?mode=signup">
                     Começar gratuitamente
@@ -479,7 +493,7 @@ export default function Index() {
                   size="lg"
                   variant="outline"
                   asChild
-                  className="border-2 border-gray-200 bg-white/50 backdrop-blur-sm text-gray-700 hover:bg-white h-14 text-base font-semibold rounded-xl"
+                  className="border-2 border-border bg-background/60 backdrop-blur-sm text-foreground hover:bg-background h-14 text-base font-semibold rounded-xl"
                 >
                   <a href="#demos">
                     <Play className="mr-2 h-5 w-5" />
@@ -488,28 +502,45 @@ export default function Index() {
                 </Button>
               </div>
 
+              {/* Trust bullets */}
+              <div className="grid sm:grid-cols-3 gap-4 text-left max-w-2xl mx-auto lg:mx-0">
+                {trustBullets.map((item) => (
+                  <div key={item.title} className="rounded-2xl bg-card/70 border border-border p-4 shadow-card">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 w-10 h-10 rounded-xl bg-accent flex items-center justify-center">
+                        <item.icon className="w-5 h-5 text-accent-foreground" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-foreground text-sm">{item.title}</div>
+                        <div className="text-sm text-muted-foreground leading-snug">{item.desc}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
               {/* Stats Row */}
-              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200/70">
+              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-border/70">
                 <div>
-                  <div className="text-3xl sm:text-4xl font-black text-gray-900">
+                  <div className="text-3xl sm:text-4xl font-black text-foreground">
                     {stats ? formatNumber(stats.total_orders) : "—"}
                   </div>
-                  <div className="text-sm text-gray-500 font-medium mt-1">Pedidos</div>
+                  <div className="text-sm text-muted-foreground font-medium mt-1">Pedidos</div>
                 </div>
                 <div>
-                  <div className="text-3xl sm:text-4xl font-black text-gray-900">
+                  <div className="text-3xl sm:text-4xl font-black text-foreground">
                     {stats ? formatNumber(stats.total_companies) : "—"}
                   </div>
-                  <div className="text-sm text-gray-500 font-medium mt-1">Restaurantes</div>
+                  <div className="text-sm text-muted-foreground font-medium mt-1">Restaurantes</div>
                 </div>
                 <div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl sm:text-4xl font-black text-gray-900">
+                    <span className="text-3xl sm:text-4xl font-black text-foreground">
                       {stats ? stats.avg_rating.toFixed(1) : "—"}
                     </span>
-                    <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+                    <Star className="h-5 w-5 text-primary fill-primary" />
                   </div>
-                  <div className="text-sm text-gray-500 font-medium mt-1">Avaliação</div>
+                  <div className="text-sm text-muted-foreground font-medium mt-1">Avaliação</div>
                 </div>
               </div>
             </motion.div>
@@ -523,7 +554,7 @@ export default function Index() {
             >
               <div className="relative w-full aspect-square max-w-[540px] mx-auto">
                 {/* Main Circle */}
-                <div className="absolute inset-8 rounded-full bg-gradient-to-br from-orange-100 via-white to-rose-100 shadow-2xl shadow-orange-200/50" />
+                <div className="absolute inset-8 rounded-full bg-card/70 border border-border shadow-2xl" />
 
                 {/* Food Image */}
                 <div className="absolute inset-0 flex items-center justify-center p-16">
@@ -562,15 +593,15 @@ export default function Index() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="absolute right-0 top-16 bg-white p-4 rounded-2xl shadow-xl border border-gray-100"
+                  className="absolute right-0 top-16 bg-card p-4 rounded-2xl shadow-xl border border-border"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-green-500 rounded-xl flex items-center justify-center">
-                      <Package className="h-6 w-6 text-white" />
+                    <div className="w-12 h-12 bg-success rounded-xl flex items-center justify-center">
+                      <Package className="h-6 w-6 text-success-foreground" />
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-gray-900">Novo pedido!</div>
-                      <div className="text-xs text-gray-500">R$ 89,90 • Pizza</div>
+                      <div className="text-sm font-bold text-foreground">Novo pedido!</div>
+                      <div className="text-xs text-muted-foreground">R$ 89,90 • Pizza</div>
                     </div>
                   </div>
                 </motion.div>
@@ -579,15 +610,15 @@ export default function Index() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.7 }}
-                  className="absolute left-0 bottom-32 bg-white p-4 rounded-2xl shadow-xl border border-gray-100"
+                  className="absolute left-0 bottom-32 bg-card p-4 rounded-2xl shadow-xl border border-border"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                      <Truck className="h-6 w-6 text-white" />
+                    <div className="w-12 h-12 bg-info rounded-xl flex items-center justify-center">
+                      <Truck className="h-6 w-6 text-info-foreground" />
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-gray-900">Em entrega</div>
-                      <div className="text-xs text-gray-500">12 min restantes</div>
+                      <div className="text-sm font-bold text-foreground">Em entrega</div>
+                      <div className="text-xs text-muted-foreground">12 min restantes</div>
                     </div>
                   </div>
                 </motion.div>
@@ -597,9 +628,9 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Benefits Bar */}
-      <section className="py-6 bg-gray-900 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-600/10 via-transparent to-rose-600/10" />
+      {/* Trust / Benefits Bar */}
+      <section className="py-6 bg-foreground text-background relative overflow-hidden">
+        <div className="absolute inset-0 bg-primary/10" />
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex flex-wrap justify-center gap-8 lg:gap-16">
             {benefits.map((benefit, index) => (
@@ -611,10 +642,10 @@ export default function Index() {
                 transition={{ delay: index * 0.1 }}
                 className="flex items-center gap-4"
               >
-                <div className="text-3xl font-black text-white">{benefit.stat}</div>
+                <div className="text-3xl font-black text-background">{benefit.stat}</div>
                 <div>
-                  <div className="text-sm font-semibold text-white">{benefit.title}</div>
-                  <div className="text-xs text-gray-400">{benefit.statLabel}</div>
+                  <div className="text-sm font-semibold text-background">{benefit.title}</div>
+                  <div className="text-xs text-background/70">{benefit.statLabel}</div>
                 </div>
               </motion.div>
             ))}
@@ -623,7 +654,7 @@ export default function Index() {
       </section>
 
       {/* Features Section - Bento Grid */}
-      <section id="features" className="py-24 lg:py-32 bg-gray-50">
+      <section id="features" className="py-20 lg:py-28 bg-muted/30">
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -631,12 +662,12 @@ export default function Index() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 shadow-sm mb-6">
-              <Sparkles className="w-4 h-4 text-orange-500" />
-              <span className="text-sm font-semibold text-gray-700">Funcionalidades</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border shadow-card mb-6">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-sm font-semibold text-foreground">Funcionalidades</span>
             </div>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 mb-4">Tudo que você precisa</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-foreground mb-4">Tudo que você precisa</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Ferramentas profissionais para gerenciar seu delivery do início ao fim
             </p>
           </motion.div>
@@ -649,10 +680,10 @@ export default function Index() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.05 }}
-                className="group relative p-6 lg:p-8 rounded-3xl bg-white border border-gray-100 hover:border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                className="group relative p-6 lg:p-8 rounded-3xl bg-card border border-border shadow-card hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
               >
                 {"isNew" in feature && feature.isNew && (
-                  <div className="absolute -top-3 right-6 px-3 py-1.5 rounded-full bg-emerald-500 text-white text-xs font-bold shadow-lg">
+                  <div className="absolute -top-3 right-6 px-3 py-1.5 rounded-full bg-success text-success-foreground text-xs font-bold shadow-lg">
                     Novo
                   </div>
                 )}
@@ -661,8 +692,8 @@ export default function Index() {
                 >
                   <feature.icon className="h-7 w-7 text-white" />
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2 text-lg">{feature.title}</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">{feature.description}</p>
+                <h3 className="font-bold text-foreground mb-2 text-lg">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
               </motion.div>
             ))}
           </div>
@@ -670,12 +701,12 @@ export default function Index() {
       </section>
 
       {/* Integrations */}
-      <section className="py-20 bg-white border-y border-gray-100">
+      <section className="py-16 bg-background border-y border-border">
         <div className="container max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <div className="lg:w-1/3">
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-4">Integrações poderosas</h2>
-              <p className="text-gray-600">
+              <h2 className="text-3xl sm:text-4xl font-black text-foreground mb-4">Integrações poderosas</h2>
+              <p className="text-muted-foreground">
                 Conectado com as melhores plataformas do mercado para facilitar sua operação.
               </p>
             </div>
@@ -687,13 +718,13 @@ export default function Index() {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="flex flex-col items-center p-6 rounded-2xl bg-gray-50 border border-gray-100 hover:bg-white hover:shadow-lg hover:border-gray-200 transition-all duration-300"
+                  className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:shadow-lg transition-all duration-300"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-3">
-                    <integration.icon className="h-6 w-6 text-gray-700" />
+                  <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-3">
+                    <integration.icon className="h-6 w-6 text-foreground" />
                   </div>
-                  <div className="text-sm font-bold text-gray-900 text-center">{integration.name}</div>
-                  <div className="text-xs text-gray-500 text-center">{integration.description}</div>
+                  <div className="text-sm font-bold text-foreground text-center">{integration.name}</div>
+                  <div className="text-xs text-muted-foreground text-center">{integration.description}</div>
                 </motion.div>
               ))}
             </div>
@@ -702,11 +733,8 @@ export default function Index() {
       </section>
 
       {/* Demo Section */}
-      <section
-        id="demos"
-        className="py-24 lg:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden"
-      >
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMC41IiBvcGFjaXR5PSIwLjA1Ii8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-50" />
+      <section id="demos" className="py-20 lg:py-28 bg-foreground text-background relative overflow-hidden">
+        <div className="absolute inset-0 bg-primary/10" />
 
         <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
@@ -715,15 +743,15 @@ export default function Index() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 mb-6">
-              <Smartphone className="w-4 h-4 text-orange-400" />
-              <span className="text-sm font-semibold text-white">Experiência Mobile</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background/10 border border-background/20 mb-6">
+              <Smartphone className="w-4 h-4 text-primary" />
+              <span className="text-sm font-semibold text-background">Experiência Mobile</span>
             </div>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-4">Apps web modernos</h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-background mb-4">Apps web modernos</h2>
+            <p className="text-xl text-background/70 max-w-2xl mx-auto">
               Seus clientes e entregadores terão a melhor experiência, na web ou no desktop
             </p>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-background/60 mt-2">
               Também disponível como aplicativo para Windows após criar sua conta
             </p>
           </motion.div>
@@ -737,32 +765,32 @@ export default function Index() {
               className="flex flex-col items-center"
             >
               <div className="relative mb-8">
-                <div className="relative w-[280px] h-[580px] bg-gray-800 rounded-[3rem] p-3 shadow-2xl">
+                <div className="relative w-[280px] h-[580px] bg-background/10 rounded-[3rem] p-3 shadow-2xl">
                   <div className="absolute top-3 left-1/2 -translate-x-1/2 w-28 h-6 bg-black rounded-b-2xl z-10" />
-                  <div className="relative w-full h-full bg-gradient-to-br from-orange-50 via-white to-rose-50 rounded-[2.5rem] overflow-hidden flex flex-col items-center justify-center p-8">
-                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-orange-500 to-rose-500 flex items-center justify-center mb-6 shadow-xl">
-                      <ChefHat className="h-10 w-10 text-white" />
+                  <div className="relative w-full h-full bg-background rounded-[2.5rem] overflow-hidden flex flex-col items-center justify-center p-8">
+                    <div className="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center mb-6 shadow-xl">
+                      <ChefHat className="h-10 w-10 text-primary-foreground" />
                     </div>
-                    <p className="text-lg font-bold text-gray-900 mb-2">Cardápio Digital</p>
-                    <p className="text-sm text-gray-500 text-center">Interface intuitiva para seus clientes</p>
+                    <p className="text-lg font-bold text-foreground mb-2">Cardápio Digital</p>
+                    <p className="text-sm text-muted-foreground text-center">Interface intuitiva para seus clientes</p>
                   </div>
                 </div>
 
                 {/* Floating Elements */}
-                <div className="absolute -right-4 top-20 bg-white p-3 rounded-xl shadow-xl border border-gray-100">
+                <div className="absolute -right-4 top-20 bg-card p-3 rounded-xl shadow-xl border border-border">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
-                      <Check className="h-4 w-4 text-white" />
+                    <div className="w-8 h-8 rounded-lg bg-success flex items-center justify-center">
+                      <Check className="h-4 w-4 text-success-foreground" />
                     </div>
                     <div className="text-xs">
-                      <span className="font-bold text-gray-900 block">Pedido #1234</span>
-                      <span className="text-gray-500">R$ 89,90</span>
+                      <span className="font-bold text-foreground block">Pedido #1234</span>
+                      <span className="text-muted-foreground">R$ 89,90</span>
                     </div>
                   </div>
                 </div>
               </div>
-              <h3 className="text-2xl font-black text-white mb-2">Para seus clientes</h3>
-              <p className="text-gray-400 text-center max-w-sm">Cardápio responsivo e moderno para pedidos rápidos</p>
+              <h3 className="text-2xl font-black text-background mb-2">Para seus clientes</h3>
+              <p className="text-background/70 text-center max-w-sm">Cardápio responsivo e moderno para pedidos rápidos</p>
             </motion.div>
 
             {/* Driver App */}
@@ -773,39 +801,39 @@ export default function Index() {
               className="flex flex-col items-center"
             >
               <div className="relative mb-8">
-                <div className="relative w-[280px] h-[580px] bg-gray-800 rounded-[3rem] p-3 shadow-2xl">
+                <div className="relative w-[280px] h-[580px] bg-background/10 rounded-[3rem] p-3 shadow-2xl">
                   <div className="absolute top-3 left-1/2 -translate-x-1/2 w-28 h-6 bg-black rounded-b-2xl z-10" />
-                  <div className="relative w-full h-full bg-gradient-to-br from-blue-50 via-white to-indigo-50 rounded-[2.5rem] overflow-hidden flex flex-col items-center justify-center p-8">
-                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mb-6 shadow-xl">
-                      <Truck className="h-10 w-10 text-white" />
+                  <div className="relative w-full h-full bg-background rounded-[2.5rem] overflow-hidden flex flex-col items-center justify-center p-8">
+                    <div className="w-20 h-20 rounded-3xl bg-info flex items-center justify-center mb-6 shadow-xl">
+                      <Truck className="h-10 w-10 text-info-foreground" />
                     </div>
-                    <p className="text-lg font-bold text-gray-900 mb-2">App do Entregador</p>
-                    <p className="text-sm text-gray-500 text-center">Gestão completa com GPS em tempo real</p>
+                    <p className="text-lg font-bold text-foreground mb-2">App do Entregador</p>
+                    <p className="text-sm text-muted-foreground text-center">Gestão completa com GPS em tempo real</p>
                   </div>
                 </div>
 
                 {/* Floating Elements */}
-                <div className="absolute -left-4 top-32 bg-white p-3 rounded-xl shadow-xl border border-gray-100">
+                <div className="absolute -left-4 top-32 bg-card p-3 rounded-xl shadow-xl border border-border">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
-                      <MapPinned className="h-4 w-4 text-white" />
+                    <div className="w-8 h-8 rounded-lg bg-info flex items-center justify-center">
+                      <MapPinned className="h-4 w-4 text-info-foreground" />
                     </div>
                     <div className="text-xs">
-                      <span className="font-bold text-gray-900 block">GPS Ativo</span>
-                      <span className="text-gray-500">2.3 km</span>
+                      <span className="font-bold text-foreground block">GPS Ativo</span>
+                      <span className="text-muted-foreground">2.3 km</span>
                     </div>
                   </div>
                 </div>
               </div>
-              <h3 className="text-2xl font-black text-white mb-2">Para entregadores</h3>
-              <p className="text-gray-400 text-center max-w-sm">Navegação GPS e gestão de entregas integrada</p>
+              <h3 className="text-2xl font-black text-background mb-2">Para entregadores</h3>
+              <p className="text-background/70 text-center max-w-sm">Navegação GPS e gestão de entregas integrada</p>
             </motion.div>
           </div>
         </div>
       </section>
 
       {/* How it Works */}
-      <section className="py-24 lg:py-32 bg-white">
+      <section className="py-20 lg:py-28 bg-background">
         <div className="container max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -813,8 +841,8 @@ export default function Index() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 mb-4">Comece em 3 passos</h2>
-            <p className="text-xl text-gray-600">Configure tudo em menos de 10 minutos</p>
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-foreground mb-4">Comece em 3 passos</h2>
+            <p className="text-xl text-muted-foreground">Configure tudo em menos de 10 minutos</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
