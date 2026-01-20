@@ -90,6 +90,7 @@ export default function Portal() {
   const [categories, setCategories] = useState<PortalCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
+  const [expandedContent, setExpandedContent] = useState<Set<string>>(new Set());
   const [loadingComments, setLoadingComments] = useState<Set<string>>(new Set());
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -104,6 +105,15 @@ export default function Portal() {
 
     setLoading(true);
     try {
+      // Ao abrir o Portal, marcar as notificações do tipo "portal_post" como lidas
+      // (isso evita o badge ficar travado mesmo após o usuário ver as postagens)
+      await supabase
+        .from("notifications")
+        .update({ is_read: true })
+        .eq("user_id", user.id)
+        .eq("is_read", false)
+        .contains("data", { type: "portal_post" });
+
       // Fetch categories
       const { data: categoriesData } = await (supabase as any)
         .from("portal_categories")
@@ -500,9 +510,31 @@ export default function Portal() {
 
             {/* Content */}
             {post.content && (
-              <p className="text-muted-foreground whitespace-pre-wrap line-clamp-4">
-                {post.content}
-              </p>
+              <div className="space-y-2">
+                <p
+                  className={`text-muted-foreground whitespace-pre-wrap ${
+                    expandedContent.has(post.id) ? "" : "line-clamp-4"
+                  }`}
+                >
+                  {post.content}
+                </p>
+
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="h-auto p-0"
+                  onClick={() =>
+                    setExpandedContent((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(post.id)) next.delete(post.id);
+                      else next.add(post.id);
+                      return next;
+                    })
+                  }
+                >
+                  {expandedContent.has(post.id) ? "Ver menos" : "Ler tudo"}
+                </Button>
+              </div>
             )}
           </CardContent>
 
