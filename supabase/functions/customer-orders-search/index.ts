@@ -40,7 +40,7 @@ serve(async (req) => {
       .select(
         `id, status, total, delivery_fee, payment_method, created_at, cancellation_reason,
          customer_name, customer_email, customer_phone,
-         order_items (id, product_name, quantity, unit_price, total_price, notes),
+         order_items (id, product_id, product_name, quantity, unit_price, total_price, options, notes),
          customer_addresses:delivery_address_id (street, number, neighborhood, city, state, complement)`,
       )
       .order('created_at', { ascending: false })
