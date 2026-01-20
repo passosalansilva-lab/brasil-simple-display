@@ -211,9 +211,11 @@ function PremiumBadge({ variant }: { variant: 'premium' | 'owned' }) {
 
 interface DashboardLayoutProps {
   children: ReactNode;
+  /** Override padding/width behavior of the main content area. */
+  contentClassName?: string;
 }
 
-export function DashboardLayout({ children }: DashboardLayoutProps) {
+export function DashboardLayout({ children, contentClassName }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const navRef = useRef<HTMLElement>(null);
@@ -684,7 +686,7 @@ const canSeeItem = (item: NavItem): boolean => {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 lg:p-6">{children}</main>
+        <main className={cn("flex-1", contentClassName ?? "p-4 lg:p-6")}>{children}</main>
       </div>
 
       {/* Botão flutuante de pedidos, renderizado em todas as páginas do dashboard */}
