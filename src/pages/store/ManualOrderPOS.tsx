@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Search,
@@ -83,6 +83,16 @@ interface AddressData {
   reference: string;
 }
 
+interface ViaCepResponse {
+  cep: string;
+  logradouro: string;
+  complemento: string;
+  bairro: string;
+  localidade: string;
+  uf: string;
+  erro?: boolean;
+}
+
 const paymentMethods: { value: PaymentMethod; label: string; icon: typeof CreditCard }[] = [
   { value: 'cash', label: 'Dinheiro', icon: Banknote },
   { value: 'pix', label: 'PIX', icon: Smartphone },
@@ -144,6 +154,58 @@ export default function ManualOrderPOS() {
     zip_code: '',
     reference: '',
   });
+
+  const [loadingCep, setLoadingCep] = useState(false);
+  const lastCepSearchedRef = useRef<string | null>(null);
+
+  const searchCep = useCallback(
+    async (cepRaw: string) => {
+      const cleanCep = cepRaw.replace(/\D/g, '');
+      if (cleanCep.length !== 8) return;
+      if (lastCepSearchedRef.current === cleanCep) return;
+
+      lastCepSearchedRef.current = cleanCep;
+      setLoadingCep(true);
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+        const data: ViaCepResponse = await response.json();
+
+        if (data.erro) {
+          toast({
+            title: 'CEP não encontrado',
+            description: 'Verifique o CEP e tente novamente',
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        setAddress((prev) => ({
+          ...prev,
+          zip_code: prev.zip_code,
+          street: data.logradouro || prev.street,
+          neighborhood: data.bairro || prev.neighborhood,
+          city: data.localidade || prev.city,
+          state: (data.uf || prev.state).toUpperCase(),
+          complement: data.complemento || prev.complement,
+        }));
+
+        toast({
+          title: 'Endereço encontrado',
+          description: `${data.logradouro}, ${data.bairro} - ${data.localidade}/${data.uf}`,
+        });
+      } catch (error: any) {
+        console.error('Error fetching CEP:', error);
+        toast({
+          title: 'Erro ao buscar CEP',
+          description: 'Tente novamente ou preencha manualmente',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoadingCep(false);
+      }
+    },
+    [toast]
+  );
 
   // Payment state
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
@@ -932,6 +994,39 @@ export default function ManualOrderPOS() {
                       <MapPin className="h-4 w-4" />
                       Endereço de Entrega
                     </h3>
+
+                    <div>
+                      <div className="flex items-center justify-between gap-2">
+                        <Label className="text-xs">CEP</Label>
+                        {loadingCep && (
+                          <span className="text-xs text-muted-foreground flex items-center gap-2">
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            Buscando...
+                          </span>
+                        )}
+                      </div>
+                      <Input
+                        placeholder="00000-000"
+                        inputMode="numeric"
+                        value={address.zip_code}
+                        onChange={(e) => {
+                          const nextZip = e.target.value;
+                          setAddress((prev) => ({ ...prev, zip_code: nextZip }));
+
+                          const clean = nextZip.replace(/\D/g, '');
+                          if (clean.length === 8) {
+                            searchCep(nextZip);
+                          }
+                        }}
+                        onBlur={(e) => {
+                          const clean = e.target.value.replace(/\D/g, '');
+                          if (clean.length === 8) {
+                            searchCep(e.target.value);
+                          }
+                        }}
+                      />
+                    </div>
+
                     <div className="grid grid-cols-3 gap-2">
                       <div className="col-span-2">
                         <Label className="text-xs">Rua *</Label>
@@ -984,14 +1079,6 @@ export default function ManualOrderPOS() {
                           onChange={(e) => setAddress({ ...address, state: e.target.value.toUpperCase() })}
                         />
                       </div>
-                    </div>
-                    <div>
-                      <Label className="text-xs">CEP</Label>
-                      <Input
-                        placeholder="00000-000"
-                        value={address.zip_code}
-                        onChange={(e) => setAddress({ ...address, zip_code: e.target.value })}
-                      />
                     </div>
                     <div>
                       <Label className="text-xs">Referência</Label>
