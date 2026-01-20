@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import JsBarcode from 'jsbarcode';
+import { useElectronPrinting } from '@/hooks/useElectronPrinting';
+import { ElectronPrintSettingsDialog } from '@/components/printing/ElectronPrintSettingsDialog';
 
 interface ComandaItem {
   id: string;
@@ -64,6 +66,17 @@ export function PrintComanda({
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [, setBarcodeDataUrl] = useState<string>('');
 
+  const {
+    isElectronApp,
+    supportsNativePrint,
+    directPrintEnabled,
+    setDirectPrintEnabled,
+    printers,
+    selectedPrinter,
+    setSelectedPrinter,
+    printHtml,
+  } = useElectronPrinting();
+
   // Generate barcode when comanda changes
   useEffect(() => {
     if (barcodeRef.current) {
@@ -122,7 +135,7 @@ export function PrintComanda({
   const formatCurrency = (value: number) =>
     value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-  const handlePrint = useCallback(() => {
+  const handlePrint = useCallback(async () => {
     const printContent = printRef.current;
     if (!printContent) return;
 
@@ -309,12 +322,7 @@ export function PrintComanda({
       </style>
     `;
 
-    const iframe = getOrCreateIframe();
-    const doc = iframe.contentDocument || iframe.contentWindow?.document;
-    if (!doc) return;
-
-    doc.open();
-    doc.write(`
+    const documentHtml = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -325,7 +333,30 @@ export function PrintComanda({
           ${html}
         </body>
       </html>
-    `);
+    `;
+
+    // Prefer native direct print in Electron when enabled
+    if (isElectronApp && supportsNativePrint && directPrintEnabled) {
+      const res = await printHtml({
+        html: documentHtml,
+        title: `Comanda #${comanda.number}`,
+        deviceName: selectedPrinter || undefined,
+        silent: true,
+      });
+
+      if (res?.success) {
+        onPrint?.();
+        return;
+      }
+      // fallback to browser print below
+    }
+
+    const iframe = getOrCreateIframe();
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) return;
+
+    doc.open();
+    doc.write(documentHtml);
     doc.close();
 
     setTimeout(async () => {
@@ -346,7 +377,17 @@ export function PrintComanda({
       win.print();
       onPrint?.();
     }, 300);
-  }, [comanda.number, getOrCreateIframe, onPrint]);
+  }, [
+    barcodeRef,
+    comanda.number,
+    directPrintEnabled,
+    getOrCreateIframe,
+    isElectronApp,
+    onPrint,
+    printHtml,
+    selectedPrinter,
+    supportsNativePrint,
+  ]);
 
   return (
     <>

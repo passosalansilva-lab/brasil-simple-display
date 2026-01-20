@@ -50,13 +50,15 @@ export default function PrintBatchComandas() {
       return iframeRef.current;
     }
     const iframe = document.createElement('iframe');
+    // Em Electron/Chromium, iframe com tamanho zero/hidden pode renderizar preview em branco.
     iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
+    iframe.style.left = '-10000px';
+    iframe.style.top = '0';
+    iframe.style.width = '800px';
+    iframe.style.height = '600px';
     iframe.style.border = 'none';
-    iframe.style.visibility = 'hidden';
+    iframe.style.opacity = '0';
+    iframe.style.pointerEvents = 'none';
     document.body.appendChild(iframe);
     iframeRef.current = iframe;
     return iframe;

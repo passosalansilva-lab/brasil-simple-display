@@ -1,6 +1,6 @@
 # Configuração de Notificações Nativas no Electron
 
-Este guia explica como configurar as notificações nativas do sistema operacional no seu app Electron do CardpOn.
+Este guia explica como configurar as notificações nativas do sistema operacional **e a impressão direta (sem diálogo)** no seu app Electron do CardpOn.
 
 ## 1. Atualize o main.js
 
@@ -124,6 +124,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Foca a janela principal
   focusWindow: () => ipcRenderer.send('focus-window'),
+
+  // ============================================
+  // IMPRESSÃO DIRETA (sem diálogo)
+  // ============================================
+  getPrinters: () => ipcRenderer.invoke('printers-get'),
+  printHtml: (options) => ipcRenderer.invoke('print-html', options),
 })
 
 // Log para confirmar que o preload foi carregado
