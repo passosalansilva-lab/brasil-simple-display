@@ -552,9 +552,9 @@ export default function ManualOrderPOS() {
         </div>
 
         {/* Main content */}
-        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-3 lg:overflow-hidden">
+        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-5 lg:overflow-hidden">
           {/* Products Section */}
-          <div className="lg:col-span-2 lg:border-r flex flex-col lg:overflow-hidden">
+          <div className="lg:col-span-3 lg:border-r flex flex-col lg:overflow-hidden">
             {/* Search and filters */}
             <div className="p-4 border-b space-y-3">
               <div className="relative">
@@ -665,67 +665,71 @@ export default function ManualOrderPOS() {
                       <p className="text-sm">Adicione produtos clicando neles</p>
                     </Card>
                   ) : (
-                    <div className="space-y-2">
-                      {cart.map((item, index) => (
-                        <Card key={`${item.product.id}-${index}`} className="p-3">
-                          <div className="flex items-start gap-3">
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm truncate">{item.product.name}</p>
-                              {item.options.length > 0 && (
-                                <GroupedOptionsDisplay 
-                                  options={item.options} 
-                                  variant="badges"
-                                  className="mt-1"
-                                />
-                              )}
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {formatCurrency(item.calculatedPrice)} cada
-                              </p>
+                    <ScrollArea className="h-64 sm:h-72 lg:h-[38vh] pr-3">
+                      <div className="space-y-2">
+                        {cart.map((item, index) => (
+                          <Card key={`${item.product.id}-${index}`} className="p-3">
+                            <div className="grid grid-cols-[1fr_auto] gap-3 items-start">
+                              <div className="min-w-0">
+                                <p className="font-medium text-sm truncate">{item.product.name}</p>
+                                {item.options.length > 0 && (
+                                  <GroupedOptionsDisplay
+                                    options={item.options}
+                                    variant="badges"
+                                    className="mt-1"
+                                  />
+                                )}
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {formatCurrency(item.calculatedPrice)} cada
+                                </p>
+                              </div>
+
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => updateQuantity(index, -1)}
+                                >
+                                  <Minus className="h-3.5 w-3.5" />
+                                </Button>
+                                <span className="w-9 text-center font-medium text-sm">
+                                  {item.quantity}
+                                </span>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => updateQuantity(index, 1)}
+                                >
+                                  <Plus className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-destructive hover:text-destructive"
+                                  onClick={() => removeFromCart(index)}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-7 w-7"
-                                onClick={() => updateQuantity(index, -1)}
-                              >
-                                <Minus className="h-3 w-3" />
-                              </Button>
-                              <span className="w-8 text-center font-medium text-sm">
-                                {item.quantity}
+
+                            <div className="grid grid-cols-[1fr_auto] gap-2 items-center mt-3 pt-3 border-t">
+                              <Input
+                                placeholder="Observação do item..."
+                                value={item.notes}
+                                onChange={(e) => updateItemNotes(index, e.target.value)}
+                                className="h-8 text-sm"
+                              />
+                              <span className="font-semibold text-sm whitespace-nowrap">
+                                {formatCurrency(item.calculatedPrice * item.quantity)}
                               </span>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-7 w-7"
-                                onClick={() => updateQuantity(index, 1)}
-                              >
-                                <Plus className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 text-destructive hover:text-destructive"
-                                onClick={() => removeFromCart(index)}
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
                             </div>
-                          </div>
-                          <div className="flex justify-between items-center mt-2 pt-2 border-t">
-                            <Input
-                              placeholder="Observação do item..."
-                              value={item.notes}
-                              onChange={(e) => updateItemNotes(index, e.target.value)}
-                              className="h-7 text-xs"
-                            />
-                            <span className="font-semibold text-sm ml-2 whitespace-nowrap">
-                              {formatCurrency(item.calculatedPrice * item.quantity)}
-                            </span>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
+                          </Card>
+                        ))}
+                      </div>
+                    </ScrollArea>
                   )}
                 </div>
 
