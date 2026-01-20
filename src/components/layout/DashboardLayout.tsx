@@ -549,7 +549,7 @@ const canSeeItem = (item: NavItem): boolean => {
             )}
             <div className="flex items-center gap-3">
               <Avatar className="h-9 w-9 ring-2 ring-sidebar-primary/30">
-                <AvatarImage src={userCompany?.logo_url || user?.user_metadata?.avatar_url} className="object-cover" />
+                <AvatarImage src={user?.user_metadata?.avatar_url} className="object-cover" />
                 <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-sm">
                   {userInitials}
                 </AvatarFallback>

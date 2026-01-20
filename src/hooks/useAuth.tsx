@@ -21,6 +21,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   hasRole: (role: AppRole) => boolean;
   refreshRoles: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -104,6 +105,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await fetchUserRoles(user.id);
     }
   }, [user?.id, fetchUserRoles]);
+
+  const refreshUser = useCallback(async () => {
+    // Useful after profile updates (e.g., avatar_url/full_name) since updateUser
+    // doesn't always trigger onAuthStateChange in all environments.
+    const { data, error } = await supabase.auth.getUser();
+    if (!error) {
+      setUser(data.user ?? null);
+    }
+  }, []);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -252,6 +262,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signOut,
         hasRole,
         refreshRoles,
+        refreshUser,
       }}
     >
       {children}
