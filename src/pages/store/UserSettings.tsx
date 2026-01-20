@@ -43,7 +43,7 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 type PasswordFormData = z.infer<typeof passwordSchema>;
 
 export default function UserSettings() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
@@ -133,6 +133,9 @@ export default function UserSettings() {
         data: { avatar_url: publicUrl },
       });
 
+      // Force refresh user in context so header/sidebar update immediately
+      await refreshUser();
+
       setAvatarUrl(publicUrl);
       toast.success('Foto atualizada com sucesso!');
       return publicUrl;
@@ -160,6 +163,9 @@ export default function UserSettings() {
         data: { avatar_url: null },
       });
 
+      // Force refresh user in context so header/sidebar update immediately
+      await refreshUser();
+
       setAvatarUrl(null);
       toast.success('Foto removida com sucesso!');
     } catch (error: any) {
@@ -179,6 +185,9 @@ export default function UserSettings() {
       });
 
       if (authError) throw authError;
+
+      // Ensure UI reflects the new name immediately
+      await refreshUser();
 
       // Update profile table
       const { error: profileError } = await supabase
