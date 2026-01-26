@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, Loader2, Plus, Trash2, GripVertical, ChevronDown
 import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core';
 import { ProductRecipeEditor } from '@/components/inventory/ProductRecipeEditor';
 import { ProductIngredientsEditor } from '@/components/menu/ProductIngredientsEditor';
+import { PricingCalculatorCard } from '@/components/menu/PricingCalculatorCard';
 import { ProductTagsEditor } from '@/components/menu/ProductTagsEditor';
 import { ProductPizzaSettings } from '@/components/menu/ProductPizzaSettings';
 import { PizzaSlicerButton } from '@/components/menu/PizzaSlicerButton';
@@ -1326,6 +1327,14 @@ export function ProductFormSheet({
                       <p className="text-xs text-muted-foreground">Deixe em branco se não estiver em promoção</p>
                     </div>
                   </div>
+
+                   <PricingCalculatorCard
+                     companyId={companyId}
+                     productId={currentProductId}
+                     onApplySuggestedPrice={(price) =>
+                       setProductForm((prev) => ({ ...prev, price: String(price || 0) }))
+                     }
+                   />
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
