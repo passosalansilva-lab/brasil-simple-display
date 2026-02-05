@@ -2204,63 +2204,30 @@ export function CheckoutPage({ companyId, companyName, companySlug, companyPhone
                       <p className="text-sm text-destructive">{errors.number.message}</p>
                     )}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="complement">Complemento</Label>
-                    <Input
-                      id="complement"
-                      placeholder="Apto, bloco..."
-                      {...register('complement')}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="neighborhood">Bairro *</Label>
-                    <Input
-                      id="neighborhood"
-                      placeholder="Nome do bairro"
-                      {...register('neighborhood')}
-                    />
-                    {errors.neighborhood && (
-                      <p className="text-sm text-destructive">{errors.neighborhood.message}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="city">Cidade *</Label>
-                    <Input
-                      id="city"
-                      placeholder="Nome da cidade"
-                      {...register('city')}
-                    />
-                    {errors.city && (
-                      <p className="text-sm text-destructive">{errors.city.message}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="state">Estado *</Label>
-                    <Input
-                      id="state"
-                      placeholder="SP"
-                      {...register('state')}
-                    />
-                    {errors.state && (
-                      <p className="text-sm text-destructive">{errors.state.message}</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="addressLabel">Apelido do endereço</Label>
-                    <Input
-                      id="addressLabel"
-                      placeholder="Ex: Casa, Trabalho..."
-                      {...register('addressLabel')}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="reference">Ponto de referência</Label>
-                    <Input
-                      id="reference"
-                      placeholder="Próximo a..."
-                      {...register('reference')}
-                    />
-                  </div>
+                  <details className="sm:col-span-2 rounded-lg border border-border bg-muted/20">
+                    <summary className="cursor-pointer select-none list-none px-4 py-3 text-sm font-medium">
+                      Detalhes do endereço (opcional)
+                      <span className="ml-2 text-xs text-muted-foreground">(complemento / referência)</span>
+                    </summary>
+                    <div className="px-4 pb-4 pt-1 grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="complement">Complemento</Label>
+                        <Input
+                          id="complement"
+                          placeholder="Apto, bloco..."
+                          {...register('complement')}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="reference">Ponto de referência</Label>
+                        <Input
+                          id="reference"
+                          placeholder="Próximo a..."
+                          {...register('reference')}
+                        />
+                      </div>
+                    </div>
+                  </details>
                 </div>
               </div>
             )}
@@ -2577,14 +2544,21 @@ export function CheckoutPage({ companyId, companyName, companySlug, companyPhone
             )}
           </section>
 
-          {/* Notes */}
+          {/* Notes (optional) */}
           <section className="bg-card rounded-xl border border-border p-4 sm:p-6">
-            <h2 className="font-display font-semibold mb-4">Observações do pedido</h2>
-            <Textarea
-              placeholder="Alguma observação para o restaurante?"
-              {...register('notes')}
-              rows={3}
-            />
+            <details className="group">
+              <summary className="cursor-pointer select-none list-none font-display font-semibold">
+                Observações do pedido (opcional)
+                <span className="ml-2 text-xs text-muted-foreground font-normal">(clique para abrir)</span>
+              </summary>
+              <div className="mt-4">
+                <Textarea
+                  placeholder="Alguma observação para o restaurante?"
+                  {...register('notes')}
+                  rows={3}
+                />
+              </div>
+            </details>
           </section>
 
           {/* Order Summary */}
