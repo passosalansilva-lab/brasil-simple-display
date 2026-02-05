@@ -486,6 +486,8 @@ export function PrintComanda({
 
           {/* Footer */}
           <div className="footer">
+            <p><strong>COMANDA SEM VALOR FISCAL</strong></p>
+            <p>Documento interno para controle do atendimento</p>
             <p>Confira os itens antes de pagar</p>
             <p>Obrigado pela preferência!</p>
           </div>
