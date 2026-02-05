@@ -1734,33 +1734,51 @@ function PublicMenuContent() {
               </div>
             </div>
 
-            {/* Categories - Horizontal Scroll */}
+            {/* Categories - Tabs */}
             {categories.length > 0 && (
-              <div
-                ref={categoriesRef}
-                className="flex gap-2 overflow-x-auto px-4 pb-3 scrollbar-hide"
-              >
-                <button
-                  onClick={() => scrollToCategory(null)}
-                  className={cn(
-                    "category-pill whitespace-nowrap flex-shrink-0",
-                    selectedCategory === null && "active",
-                  )}
-                >
-                  Todos
-                </button>
-                {visibleCategories.map((category) => (
+              <div ref={categoriesRef} className="px-4 pb-3">
+                <div className="flex gap-4 overflow-x-auto scrollbar-hide">
                   <button
-                    key={category.id}
-                    onClick={() => scrollToCategory(category.id)}
+                    type="button"
+                    onClick={() => scrollToCategory(null)}
                     className={cn(
-                      "category-pill whitespace-nowrap flex-shrink-0",
-                      selectedCategory === category.id && "active",
+                      "relative whitespace-nowrap py-2 text-sm font-medium transition-colors",
+                      selectedCategory === null
+                        ? "text-primary-foreground"
+                        : "text-primary-foreground/80 hover:text-primary-foreground",
                     )}
                   >
-                    {category.name}
+                    Todos
+                    <span
+                      className={cn(
+                        "pointer-events-none absolute -bottom-0.5 left-0 right-0 h-0.5 rounded-full bg-primary-foreground transition-opacity",
+                        selectedCategory === null ? "opacity-100" : "opacity-0",
+                      )}
+                    />
                   </button>
-                ))}
+
+                  {visibleCategories.map((category) => (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() => scrollToCategory(category.id)}
+                      className={cn(
+                        "relative whitespace-nowrap py-2 text-sm font-medium transition-colors",
+                        selectedCategory === category.id
+                          ? "text-primary-foreground"
+                          : "text-primary-foreground/80 hover:text-primary-foreground",
+                      )}
+                    >
+                      {category.name}
+                      <span
+                        className={cn(
+                          "pointer-events-none absolute -bottom-0.5 left-0 right-0 h-0.5 rounded-full bg-primary-foreground transition-opacity",
+                          selectedCategory === category.id ? "opacity-100" : "opacity-0",
+                        )}
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
